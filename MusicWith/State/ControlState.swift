@@ -34,9 +34,11 @@ class ControlState: ObservableObject {
         
         if playState.isPlaying {
             player.pause()
+            playState.isPlaying = false
         }
         else {
             player.play()
+            playState.isPlaying = true
         }
     }
 
