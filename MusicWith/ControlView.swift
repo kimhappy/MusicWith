@@ -13,15 +13,23 @@ struct ControlView: View {
     @EnvironmentObject var controlState: ControlState
 
     var body: some View {
-        VStack(spacing: 0) {
-            ControlCoreView()
-            CustomTabView(isTop: false, selection: $selection, tabCount: 2) {
-                LyricsView()
-                    .tag(0)
-                ChatView()
-                    .tag(1)
+        if controlState.sheetHeight == .mini {
+            VStack(spacing: 0) {
+                ControlCoreView()
+                Spacer()
             }
-            Spacer()
+        }
+        else {
+            VStack(spacing: 0) {
+                ControlCoreView()
+                CustomTabView(isTop: false, selection: $selection, tabCount: 2) {
+                    LyricsView()
+                        .tag(0)
+                    ChatView()
+                        .tag(1)
+                }
+                Spacer()
+            }
         }
     }
 }

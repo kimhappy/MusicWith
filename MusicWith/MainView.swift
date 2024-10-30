@@ -8,10 +8,7 @@
 import SwiftUI
 
 struct MainView: View {
-    static let mini = PresentationDetent.fraction(0.15)
-    static let full = PresentationDetent.large
-
-    @State private var selectedDetent = mini
+    @State private var selectedDetent = SheetHeight.mini.detent()
     @State private var selection      = 0
 
     @StateObject private var controlState = ControlState()
@@ -32,9 +29,17 @@ struct MainView: View {
         .environmentObject(controlState)
         .sheet(isPresented: $controlState.showSheet) {
             ControlView()
-                .presentationDetents([MainView.mini, MainView.full], selection: $selectedDetent)
+                .presentationDetents([SheetHeight.mini.detent(), SheetHeight.full.detent()], selection: $selectedDetent)
                 .presentationBackgroundInteraction(.enabled)
                 .environmentObject(controlState)
+                .onChange(of: selectedDetent) { newValue in
+                    if newValue == SheetHeight.mini.detent() {
+                        controlState.sheetHeight = .mini
+                    }
+                    else {
+                        controlState.sheetHeight = .full
+                    }
+                }
         }
     }
 }

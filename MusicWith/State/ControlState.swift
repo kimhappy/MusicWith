@@ -16,9 +16,11 @@ class ControlState: ObservableObject {
         didSet {
             if !showSheet {
                 stopPlayback()
+                sheetHeight = .mini
             }
         }
     }
+    @Published var sheetHeight: SheetHeight = .mini
 
     func setSong(song: Song) -> Bool {
         guard let url = URL(string: song.url) else { return false }
