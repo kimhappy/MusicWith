@@ -12,7 +12,7 @@ struct MainView: View {
     @State private var selection      = 0
 
     @StateObject private var controlState = ControlState()
-
+    
     var body: some View {
         VStack(spacing: 0) {
             NavigationStack {

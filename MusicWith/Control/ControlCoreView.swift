@@ -9,9 +9,11 @@ import SwiftUI
 
 struct ControlCoreView: View {
     @EnvironmentObject var controlState: ControlState
-
+    //
     var body: some View {
         if let state = controlState.playState {
+            
+            
             HStack {
                 AsyncImage(url: URL(string: state.song.image)) { image in
                     image
@@ -28,9 +30,22 @@ struct ControlCoreView: View {
                         .font(.subheadline)
                 }
                 VStack(alignment: .center) {
+                    // change
+                    
+                    // 실시간 반영 안됨
                     HStack {
-    
+                        Button(action : controlState.togglePlaying) {
+                            if state.isPlaying {
+                                Image(systemName: "pause")
+                            }
+                            else {
+                                Image(systemName: "play")
+                            }
+                        }
                     }
+                    
+                    // changed ended
+                    
                     ProgressView(value: state.now, total: state.duration)
                         .padding()
                 }
