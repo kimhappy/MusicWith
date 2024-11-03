@@ -32,9 +32,11 @@ struct MainView: View {
         .environmentObject(controlState)
         .sheet(isPresented: $controlState.showSheet) {
             ControlView()
+                .interactiveDismissDisabled()
                 .presentationDetents([MainView.mini, MainView.full], selection: $selectedDetent)
                 .presentationBackgroundInteraction(.enabled)
                 .environmentObject(controlState)
+                
         }
     }
 }
