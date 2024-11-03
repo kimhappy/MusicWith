@@ -9,19 +9,10 @@ import Combine
 
 
 struct Chat: Identifiable {
-    let id          : String    // chat id
+    let id          = UUID()    // chat id
     let user        : String    // sending user
     let text        : String    // text
     let song        : String    // song with a chat
     let time_global : String    // global chatting time
     let time_song   : String    // chatted playtime of the song
-    
-    init(id: String, user: String, text: String, song: String, time_global: String, time_song: String) {
-        self.id          = id
-        self.user        = user
-        self.text        = text
-        self.song        = song
-        self.time_global = time_global
-        self.time_song   = time_song
-    }
 }

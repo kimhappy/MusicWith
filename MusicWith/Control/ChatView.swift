@@ -6,24 +6,34 @@
 //
 
 import SwiftUI
+import Combine
 
 struct ChatView: View {
+    @EnvironmentObject var controlState: ControlState
     @State private var messageText: String = ""
     @State private var messages: [String] = []
+    @State private var chats: [Chat] = []
+    
     var body: some View {
         VStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
-                    ForEach(messages, id: \.self) { message in
+                    ForEach(chats, id:\.id) { chatting in
                         HStack {
-                            Text(message)
+                            Text(chatting.text)
                                 .padding()
                                 .background(Color.green)
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
                             Spacer()
+                            if let state = controlState.playState {
+                                Text(String(state.now))
+                                    .font(.system(size:15))
+                            }
+                            
                         }
                     }
+                    
                 }
                 .padding()
             }
@@ -49,12 +59,13 @@ struct ChatView: View {
     
     private func sendMessage() {
         if !messageText.isEmpty {
-            messages.append(messageText)
+            chats.append(Chat(user: "user", text: messageText, song: "song", time_global: "time", time_song: "now"))
             messageText = ""
         }
     }
 }
 
 #Preview {
-    ChatView()
+    MainView()
 }
+
