@@ -13,7 +13,6 @@ struct ControlCoreView: View {
     var body: some View {
         if let state = controlState.playState {
             
-            
             HStack {
                 AsyncImage(url: URL(string: state.song.image)) { image in
                     image
@@ -31,7 +30,7 @@ struct ControlCoreView: View {
                 }
                 VStack(alignment: .center) {
                     // change
-                    
+                    // 음악 재생 Test 용도
                     // 실시간 반영 안됨
                     HStack {
                         Button(action : controlState.togglePlaying) {
@@ -43,7 +42,6 @@ struct ControlCoreView: View {
                             }
                         }
                     }
-                    
                     // changed ended
                     
                     ProgressView(value: state.now, total: state.duration)

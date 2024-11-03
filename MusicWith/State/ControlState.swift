@@ -11,6 +11,10 @@ import AVFoundation
 class ControlState: ObservableObject {
     private var player: AVPlayer?
     
+    //added
+    private var timeObserver : Any?
+    
+    
     @Published var playState: PlayState? = nil
     @Published var showSheet: Bool       = false {
         didSet {
@@ -21,7 +25,7 @@ class ControlState: ObservableObject {
         }
     }
     @Published var sheetHeight: SheetHeight = .mini
-    
+
     
     func setSong(song: Song) -> Bool {
         guard let url = URL(string: song.url) else { return false }
@@ -60,17 +64,18 @@ class ControlState: ObservableObject {
        
         
         // TODO: Implement
-        // current tim
+        
         guard let player    else { return }
         guard let playState else { return }
-        // print(player, playState.song)
+        
+        
         playState.isPlaying = true;
+        playState.now = 0.0
         
         getDuration()
         setNow()
         
         player.play()
-        print(playState.duration)
         
     }
     
@@ -79,21 +84,33 @@ class ControlState: ObservableObject {
         guard let player    else { return }
         guard let playState else { return }
         
-       
-        
         if let duration = player.currentItem?.asset.duration {
             playState.duration = CMTimeGetSeconds(duration)
         }
         
     }
     
+    // Slow?
     private func setNow() {
         guard let player    else { return }
         guard let playState else { return }
         
+        
         let interval = CMTime(seconds: 1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
             
-        
+        timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { time in
+            //guard let self = self else { return }
+            //guard let playState = self.playState else { return }
+            playState.now = CMTimeGetSeconds(time)
+                    
+            // 음악이 끝나면 일시정지 상태로 변경
+            if playState.now >= playState.duration {
+                    playState.isPlaying = false
+                    player.seek(to: .zero)
+                }
+            }
+         
+         
     }
     
     

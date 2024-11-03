@@ -9,8 +9,11 @@ import SwiftUI
 
 struct SearchView: View {
     @State var searchedPlayLists = PlayList.myPlayLists();
-    @State var isSearched = false;
+    @State private var isSearched = false;
     @State private var searchText = "";
+    
+    // 최근 검색어, Optional
+    @State private var recentSearch : [String] = ["example", "example2", "example3"]
     
     var body: some View {
         VStack {
@@ -50,6 +53,7 @@ struct SearchView: View {
                     
                     // Todo Implement Search and get Playlists
                     searchedPlayLists = PlayList.myPlayLists();
+                    recentSearch.append(searchText)
                     
                 }
         
@@ -87,7 +91,39 @@ struct SearchView: View {
                 .padding(.horizontal)
             }
             
+            
+            // 최근 검색어, 필요 없다고 생각될 시 없애기
             else {
+        
+                ScrollView {
+                    LazyVStack(alignment: .leading) {
+                        ForEach(recentSearch, id: \.self) { term in
+                            HStack {
+                                Text(term)
+                                    .padding(.vertical, 8)
+                                Spacer()
+                                // 삭제 버튼
+                                Button(action: {
+                                    recentSearch.removeAll{$0 == term}
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
+                                }
+                            }
+                            .padding(.horizontal)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(8)
+                            .onTapGesture {
+                                searchText = term;
+                                isSearched = true;
+                                // Todo Implement Search and get Playlists
+                                searchedPlayLists = PlayList.myPlayLists();
+                            }
+                            Divider()
+                        }
+                    }
+                    .padding(.horizontal)
+                }
                 Spacer()
             }
         }
