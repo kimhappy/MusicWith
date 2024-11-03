@@ -11,7 +11,7 @@ struct MainView: View {
     @State private var selectedDetent = SheetHeight.mini.detent()
     @State private var selection      = 0
 
-    @StateObject private var controlState = ControlState()
+    @StateObject private var controlState = ControlState.shared
 
     var body: some View {
         VStack(spacing: 0) {
@@ -26,12 +26,10 @@ struct MainView: View {
                 }
             }
         }
-        .environmentObject(controlState)
         .sheet(isPresented: $controlState.showSheet) {
             ControlView()
                 .presentationDetents([SheetHeight.mini.detent(), SheetHeight.full.detent()], selection: $selectedDetent)
                 .presentationBackgroundInteraction(.enabled)
-                .environmentObject(controlState)
                 .onChange(of: selectedDetent) { newValue in
                     if newValue == SheetHeight.mini.detent() {
                         controlState.sheetHeight = .mini
