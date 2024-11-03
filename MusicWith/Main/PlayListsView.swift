@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct PlayListsView: View {
+    @State var userName: String = ""
+
     let myPlayLists = PlayList.myPlayLists()
-    
+
     var body: some View {
         VStack {
-            Text("내 플레이리스트")
+            Text("\(userName) 플레이리스트")
                 .font(.title)
                 .padding(.top, 20)
             ScrollView {
@@ -41,6 +43,18 @@ struct PlayListsView: View {
                 }
             }
             .padding(.horizontal)
+        }
+        .onAppear {
+            SpotifyAPI.userName { name in
+                DispatchQueue.main.async {
+                    self.userName = if let name = name {
+                        "\(name)의"
+                    }
+                    else {
+                        "내"
+                    }
+                }
+            }
         }
     }
 }

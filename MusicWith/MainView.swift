@@ -11,33 +11,42 @@ struct MainView: View {
     @State private var selectedDetent = SheetHeight.mini.detent()
     @State private var selection      = 0
 
-    @StateObject private var controlState = ControlState.shared
+    @StateObject private var controlState = ControlState    .shared
+    @StateObject private var authState    = SpotifyAuthState.shared
 
     var body: some View {
-        VStack(spacing: 0) {
-            NavigationStack {
-                CustomTabView(isTop: true, selection: $selection, tabCount: 3) {
-                    PlayListsView()
-                        .tag(0)
-                    RecommendView()
-                        .tag(1)
-                    SearchView()
-                        .tag(2)
+        if authState.isLoggedIn {
+            VStack(spacing: 0) {
+                NavigationStack {
+                    CustomTabView(isTop: true, selection: $selection, tabCount: 3) {
+                        PlayListsView()
+                            .tag(0)
+                        RecommendView()
+                            .tag(1)
+                        SearchView()
+                            .tag(2)
+                    }
                 }
             }
+            .sheet(isPresented: $controlState.showSheet) {
+                ControlView()
+                    .presentationDetents([SheetHeight.mini.detent(), SheetHeight.full.detent()], selection: $selectedDetent)
+                    .presentationBackgroundInteraction(.enabled)
+                    .onChange(of: selectedDetent) { newValue in
+                        if newValue == SheetHeight.mini.detent() {
+                            controlState.sheetHeight = .mini
+                        }
+                        else {
+                            controlState.sheetHeight = .full
+                        }
+                    }
+            }
         }
-        .sheet(isPresented: $controlState.showSheet) {
-            ControlView()
-                .presentationDetents([SheetHeight.mini.detent(), SheetHeight.full.detent()], selection: $selectedDetent)
-                .presentationBackgroundInteraction(.enabled)
-                .onChange(of: selectedDetent) { newValue in
-                    if newValue == SheetHeight.mini.detent() {
-                        controlState.sheetHeight = .mini
-                    }
-                    else {
-                        controlState.sheetHeight = .full
-                    }
-                }
+        else {
+            Button("Login with Spotify") {
+                authState.login()
+            }
+            .buttonStyle(.borderedProminent)
         }
     }
 }
