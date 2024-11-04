@@ -14,7 +14,7 @@ struct PlayListsView: View {
 
     var body: some View {
         VStack {
-            Text("\(userName) 플레이리스트")
+            Text("\(userName)의 플레이리스트")
                 .font(.title)
                 .padding(.top, 20)
             ScrollView {
@@ -44,17 +44,8 @@ struct PlayListsView: View {
             }
             .padding(.horizontal)
         }
-        .onAppear {
-            SpotifyAPI.userName { name in
-                DispatchQueue.main.async {
-                    self.userName = if let name = name {
-                        "\(name)의"
-                    }
-                    else {
-                        "내"
-                    }
-                }
-            }
+        .task {
+            userName = await SpotifyAPI.userName() ?? "나"
         }
     }
 }

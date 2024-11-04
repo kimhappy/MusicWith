@@ -8,28 +8,23 @@
 import SwiftUI
 
 public struct SpotifyAPI {
-    static func userName(callback: @escaping (String?) -> Void) {
+    static func userName() async -> String? {
         let authState = SpotifyAuthState.shared
-
+        
         guard authState.isLoggedIn else {
-            callback(nil)
-            return
+            return nil
         }
-
-        var request = URLRequest(url: URL(string: "https://api.spotify.com/v1/me")!)
+        
+        let url     = URL(string: "https://api.spotify.com/v1/me")!
+        var request = URLRequest(url: url)
         request.setValue("Bearer \(authState.accessToken!)", forHTTPHeaderField: "Authorization")
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data                                                                        ,
-                  let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                  let name = json["display_name"] as? String                                             ,
-                  error == nil else {
-                callback(nil)
-                return
-            }
-
-            callback(name)
+        
+        guard let (data, _) = try? await URLSession.shared.data(for: request),
+              let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+              let name = json["display_name"] as? String else {
+            return nil
         }
-        .resume()
+        
+        return name
     }
 }
