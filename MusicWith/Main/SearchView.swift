@@ -13,8 +13,8 @@ struct SearchView: View {
     @State private var searchText = "";
     
     // 최근 검색어, Optional
-    @State private var recentSearch : [String] = ["example", "example2", "example3"]
-    
+    @StateObject private var recentSearch = RecentSearch(id: "temp")
+
     var body: some View {
         VStack {
             Text("플레이리스트 검색")
@@ -35,9 +35,7 @@ struct SearchView: View {
                         
                         if !searchText.isEmpty {
                             Button(action: {
-                                self.searchText = ""
-                                isSearched = false;
-                                searchedPlayLists = [];
+                                deleteSearch()
                                 
                             }) {
                                 Image(systemName: "xmark.circle.fill")
@@ -45,16 +43,17 @@ struct SearchView: View {
                                     .padding(.trailing, 8)
                             }
                         }
+                        
                     }
                 )
                 .padding(.horizontal, 10)
                 .onSubmit {
-                    isSearched = true;
-                    
-                    // Todo Implement Search and get Playlists
-                    searchedPlayLists = PlayList.myPlayLists();
-                    recentSearch.append(searchText)
-                    
+                    sendSearch()
+                }
+                .onChange(of: searchText) {
+                    if searchText == "" {
+                        isSearched = false
+                    }
                 }
         
             
@@ -94,17 +93,16 @@ struct SearchView: View {
             
             // 최근 검색어, 필요 없다고 생각될 시 없애기
             else {
-        
                 ScrollView {
                     LazyVStack(alignment: .leading) {
-                        ForEach(recentSearch, id: \.self) { term in
+                        ForEach(recentSearch.recentSearch, id: \.self) { term in
                             HStack {
                                 Text(term)
                                     .padding(.vertical, 8)
                                 Spacer()
                                 // 삭제 버튼
                                 Button(action: {
-                                    recentSearch.removeAll{$0 == term}
+                                    deleteRecent(term)
                                 }) {
                                     Image(systemName: "trash")
                                         .foregroundColor(.red)
@@ -114,10 +112,7 @@ struct SearchView: View {
                             .background(Color(.systemBackground))
                             .cornerRadius(8)
                             .onTapGesture {
-                                searchText = term;
-                                isSearched = true;
-                                // Todo Implement Search and get Playlists
-                                searchedPlayLists = PlayList.myPlayLists();
+                                tapRecent(term)
                             }
                             Divider()
                         }
@@ -127,8 +122,32 @@ struct SearchView: View {
                 Spacer()
             }
         }
+    }
+    
+    private func deleteSearch() {
+        searchText = ""
+        isSearched = false;
+        searchedPlayLists = [];
+    }
+    
+    private func sendSearch() {
+        isSearched = true;
         
-        
+        // Todo Implement Search and get Playlists
+        searchedPlayLists = PlayList.myPlayLists();
+        recentSearch.addRecentSearch(searchText)
+    }
+    
+    // Recent Search is Optional
+    private func tapRecent(_ term : String) {
+        searchText = term;
+        isSearched = true;
+        // Todo Implement Search and get Playlists
+        searchedPlayLists = PlayList.myPlayLists();
+    }
+    
+    private func deleteRecent(_ term : String) {
+        recentSearch.deleteRecentSearch(term)
     }
 }
 
