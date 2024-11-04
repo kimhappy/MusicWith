@@ -15,4 +15,6 @@ struct Chat: Identifiable {
     let song        : String    // song with a chat
     let time_global : String    // global chatting time
     let time_song   : String    // chatted playtime of the song
+    let isReply     : Bool      // true when this chat is reply
+    let parentId    : UUID?
 }
