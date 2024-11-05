@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ControlCoreView: View {
-    @EnvironmentObject var controlState: ControlState
+    @StateObject var controlState = ControlState.shared
 
     var body: some View {
         if let state = controlState.playState {

@@ -10,7 +10,7 @@ import SwiftUI
 struct PlayListView: View {
     let playlist: PlayList
 
-    @EnvironmentObject var controlState: ControlState
+    @StateObject var controlState = ControlState.shared
 
     var body: some View {
         ScrollView {
@@ -43,7 +43,6 @@ struct PlayListView: View {
         .navigationTitle(playlist.name)
     }
 }
-
 
 #Preview {
     MainView()
