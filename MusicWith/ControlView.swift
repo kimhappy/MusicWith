@@ -8,9 +8,8 @@
 import SwiftUI
 
 struct ControlView: View {
-    @State private var selection = 0
-
-    @EnvironmentObject var controlState: ControlState
+    @State       var selection = 0
+    @StateObject var controlState = ControlState.shared
 
     var body: some View {
         if controlState.sheetHeight == .mini {

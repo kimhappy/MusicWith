@@ -9,6 +9,9 @@ import SwiftUI
 import AVFoundation
 
 class ControlState: ObservableObject {
+    static var shared = ControlState()
+    private init() {}
+    
     private var player: AVPlayer?
     
     //added
