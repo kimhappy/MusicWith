@@ -11,7 +11,7 @@ import AVFoundation
 class ControlState: ObservableObject {
     static var shared = ControlState()
     private init() {}
-    
+
     private var player: AVPlayer?
 
     @Published var playState: PlayState? = nil
@@ -36,7 +36,7 @@ class ControlState: ObservableObject {
     func togglePlaying() {
         guard let player    else { return }
         guard let playState else { return }
-        
+
         if playState.isPlaying {
             player.pause()
             playState.isPlaying = false

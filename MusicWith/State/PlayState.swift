@@ -12,7 +12,7 @@ class PlayState {
     var isPlaying: Bool
     var duration : Double
     var now      : Double
-    
+
     init(song: Song) {
         self.song      = song
         self.isPlaying = false

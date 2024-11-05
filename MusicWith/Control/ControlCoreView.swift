@@ -29,7 +29,7 @@ struct ControlCoreView: View {
                 }
                 VStack(alignment: .center) {
                     HStack {
-    
+
                     }
                     ProgressView(value: state.now, total: state.duration)
                         .padding()

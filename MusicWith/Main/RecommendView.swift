@@ -9,7 +9,7 @@ import SwiftUI
 
 struct RecommendView: View {
     let recommendPlayLists = PlayList.recommendPlayLists()
-    
+
     var body: some View {
         VStack {
             Text("추천 플레이리스트")

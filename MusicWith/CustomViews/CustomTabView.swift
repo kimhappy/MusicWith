@@ -13,14 +13,14 @@ struct CustomTabView< Content: View >: View {
 
     let tabCount: Int
     let content : Content
-    
+
     init(isTop: Bool, selection: Binding< Int >, tabCount: Int, @ViewBuilder content: () -> Content) {
         self.isTop      = isTop
         self._selection = selection
         self.tabCount   = tabCount
         self.content    = content()
     }
-    
+
     var body: some View {
         if isTop {
             VStack(spacing: 0) {
@@ -54,7 +54,6 @@ struct CustomTabView< Content: View >: View {
                 }
             }
         }
-        
     }
 }
 
