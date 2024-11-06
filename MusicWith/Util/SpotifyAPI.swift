@@ -57,15 +57,50 @@ public struct SpotifyAPI {
         var results: [SpotifyPlayListItem] = []
 
         for item in items {
-            guard let name    = item         [ "name"   ] as?   String,
-                  let trackId = item         [ "id"     ] as?   String,
+            guard let trackId = item         [ "id"     ] as?   String,
+                  let name    = item         [ "name"   ] as?   String,
                   let album   = item         [ "album"  ] as?  [String: Any],
                   let images  = album        [ "images" ] as? [[String: Any]],
-                  let image   = images.first?[ "url"    ] as?   String else {
+                  let url     = images.first?[ "url"    ] as?   String else {
                 return nil
             }
 
-            let result = SpotifyPlayListItem(trackId: trackId, name: name, image: image)
+            let result = SpotifyPlayListItem(trackId: trackId, name: name, image: url)
+            results.append(result)
+        }
+
+        return results
+    }
+
+    // https://developer.spotify.com/documentation/web-api/reference/get-a-list-of-current-users-playlists
+    // https://developer.spotify.com/documentation/web-api/reference/get-list-users-playlists
+    // TODO: Test
+    static func playLists(id: String? = nil, limit: Int = 20, offset: Int = 0) async -> [SpotifyPlayListsItem]? {
+        guard let json  = await getJson("https://api.spotify.com/v1/\(id.map { "users/\($0)" } ?? "me")/playlists?limit=\(limit)&offset=\(offset)"),
+              let items = json[ "items" ] as? [[String: Any]] else {
+            return nil
+        }
+
+        var results: [SpotifyPlayListsItem] = []
+
+        for item in items {
+            guard let playListId = item[ "id"     ] as? String,
+                  let name       = item[ "name"   ] as? String,
+                  let images     = item[ "images" ] as? [[String: Any]] else {
+                return nil
+            }
+
+            var urls: [String] = []
+
+            for image in images {
+                guard let url = image[ "url" ] as? String else {
+                    return nil
+                }
+
+                urls.append(url)
+            }
+
+            let result = SpotifyPlayListsItem(playListId: playListId, name: name, images: urls)
             results.append(result)
         }
 
