@@ -35,6 +35,8 @@ struct PlayListView: View {
                     .onTapGesture {
                         // TODO: Fallback control
                         controlState.setSong(song: song)
+                        controlState.setPlaylist(playlist, song)
+                        controlState.setMusicIndex(playlist, song)
                     }
                 }
             }

@@ -2,7 +2,6 @@
 import SwiftUI
 
 class RecentSearch : ObservableObject {
-    let id   : String
     @Published var recentSearch: [String]
     
     func myRecentSearch() -> [String] {
@@ -17,8 +16,7 @@ class RecentSearch : ObservableObject {
         recentSearch.removeAll{$0 == term}
     }
 
-    init(id: String) {
-        self.id    = id
+    init() {
         self.recentSearch = [
             "example1",
             "example2",

@@ -8,16 +8,17 @@
 import SwiftUI
 
 struct SearchView: View {
-    @State var searchedPlayLists = PlayList.myPlayLists();
+    @State var searchedSongLists = PlayList(id: "temp").songs;
     @State private var isSearched = false;
     @State private var searchText = "";
     
     // 최근 검색어, Optional
-    @StateObject private var recentSearch = RecentSearch(id: "temp")
-
+    @StateObject private var recentSearch = RecentSearch()
+    @StateObject var controlState = ControlState.shared
+    
     var body: some View {
         VStack {
-            Text("플레이리스트 검색")
+            Text("음악 검색")
                 .font(.title)
                 .padding(.top, 20)
             
@@ -61,29 +62,27 @@ struct SearchView: View {
             if isSearched {
                 ScrollView {
                     LazyVStack {
-                        ForEach(searchedPlayLists, id: \.id) { playlist in
-                            NavigationLink(destination: PlayListView(playlist: playlist)) {
-                                HStack {
-                                    AsyncImage(url: URL(string: playlist.image)) { image in
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(width: 50, height: 50)
-                                            .clipped()
-                                    } placeholder: {
-                                        ProgressView()
-                                            .frame(width: 50, height: 50)
-                                    }
-                                    Text(playlist.name)
-                                        .foregroundColor(.black)
-                                        .padding(.leading, 20)
-                                    Spacer()
-                                    
+                        ForEach(searchedSongLists, id: \.id) { song in
+                            HStack {
+                                AsyncImage(url: URL(string: song.image)) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 50, height: 50)
+                                        .clipped()
+                                } placeholder: {
+                                    ProgressView()
+                                        .frame(width: 50, height: 50)
                                 }
-                                .padding(.vertical, 5)
+                                Text(song.title)
+                                    .padding(.leading, 20)
+                                Spacer()
                             }
-                            
-                            
+                            .padding(.vertical, 5)
+                            .onTapGesture {
+                                // TODO: Fallback control
+                                controlState.setSong(song: song)
+                            }
                         }
                     }
                 }
@@ -95,7 +94,7 @@ struct SearchView: View {
             else {
                 ScrollView {
                     LazyVStack(alignment: .leading) {
-                        ForEach(recentSearch.recentSearch, id: \.self) { term in
+                        ForEach(recentSearch.myRecentSearch(), id: \.self) { term in
                             HStack {
                                 Text(term)
                                     .padding(.vertical, 8)
@@ -127,14 +126,14 @@ struct SearchView: View {
     private func deleteSearch() {
         searchText = ""
         isSearched = false;
-        searchedPlayLists = [];
+        searchedSongLists = [];
     }
     
     private func sendSearch() {
         isSearched = true;
         
         // Todo Implement Search and get Playlists
-        searchedPlayLists = PlayList.myPlayLists();
+        searchedSongLists = PlayList(id: "temp").songs;
         recentSearch.addRecentSearch(searchText)
     }
     
@@ -143,7 +142,7 @@ struct SearchView: View {
         searchText = term;
         isSearched = true;
         // Todo Implement Search and get Playlists
-        searchedPlayLists = PlayList.myPlayLists();
+        searchedSongLists = PlayList(id: "temp").songs;
     }
     
     private func deleteRecent(_ term : String) {
@@ -152,5 +151,5 @@ struct SearchView: View {
 }
 
 #Preview {
-    SearchView()
+    MainView()
 }

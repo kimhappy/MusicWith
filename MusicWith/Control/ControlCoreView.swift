@@ -29,23 +29,54 @@ struct ControlCoreView: View {
                         .font(.subheadline)
                 }
                 VStack(alignment: .center) {
-                    // change
-                    // 음악 재생 Test 용도
-                    // 실시간 반영 안됨
                     HStack {
+                        Button(action : controlState.playPrev) {
+                            Image(systemName: "backward.fill")
+                                .frame(width: 50, height: 50)
+                        }
+                        .padding(.horizontal, 5)
+                       
+                        
                         Button(action : controlState.togglePlaying) {
                             if state.isPlaying {
                                 Image(systemName: "pause")
+                                    .frame(width: 50, height: 50)
                             }
                             else {
                                 Image(systemName: "play")
+                                    .frame(width: 50, height: 50)
                             }
                         }
+                        .padding(.horizontal, 5)
+                        Button(action : controlState.playNext) {
+                            Image(systemName: "forward.fill")
+                                .frame(width: 50, height: 50)
+                        }
+                        .padding(.horizontal, 5)
                     }
-                    // changed ended
+                    .padding(.top, 30)
                     
-                    ProgressView(value: state.now, total: state.duration)
-                        .padding()
+                    
+                    
+                    Slider(value: Binding(get: {state.now}, set: {
+                        newNow in
+                        state.now = newNow
+                        
+                        if !controlState.isDragging {
+                            controlState.seek(newNow)
+                        }
+                         
+                        
+                    }) ,
+                           in: 0...state.duration,
+                           onEditingChanged: {
+                        isEditing in
+                        controlState.isDragging = isEditing
+                        if !isEditing {
+                            controlState.seek(state.now)
+                        }
+                    })
+                    .padding()
                 }
             }
             .padding()
