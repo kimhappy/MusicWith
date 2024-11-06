@@ -8,13 +8,25 @@
 import SwiftUI
 
 struct LyricsView: View {
+    @StateObject var controlState = ControlState.shared
+    
     var body: some View {
-        VStack {
-            Text("가사")
+        if let state = controlState.playState {
+            VStack {
+                Text("가사")
+                    .padding(.top, 30)
+                    .font(.system(size: 20, weight: .semibold))
+                ScrollView {
+                    Text(state.song.lyric)
+                        .lineSpacing(30)
+                        .offset(y:30)
+                        .padding(30)
+                }
+            }
         }
     }
 }
 
 #Preview {
-    LyricsView()
+    MainView()
 }
