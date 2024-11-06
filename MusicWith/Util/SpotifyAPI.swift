@@ -57,15 +57,15 @@ public struct SpotifyAPI {
         var results: [SpotifyPlayListItem] = []
 
         for item in items {
-            guard let name   = item         [ "name"   ] as?   String,
-                  let songId = item         [ "id"     ] as?   String,
-                  let album  = item         [ "album"  ] as?  [String: Any],
-                  let images = album        [ "images" ] as? [[String: Any]],
-                  let image  = images.first?[ "url"    ] as?   String else {
+            guard let name    = item         [ "name"   ] as?   String,
+                  let trackId = item         [ "id"     ] as?   String,
+                  let album   = item         [ "album"  ] as?  [String: Any],
+                  let images  = album        [ "images" ] as? [[String: Any]],
+                  let image   = images.first?[ "url"    ] as?   String else {
                 return nil
             }
 
-            let result = SpotifyPlayListItem(songId: songId, name: name, image: image)
+            let result = SpotifyPlayListItem(trackId: trackId, name: name, image: image)
             results.append(result)
         }
 

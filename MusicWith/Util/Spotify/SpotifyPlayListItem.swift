@@ -6,7 +6,7 @@
 //
 
 struct SpotifyPlayListItem {
-    var songId: String
-    var name  : String
-    var image : String
+    var trackId: String
+    var name   : String
+    var image  : String
 }
