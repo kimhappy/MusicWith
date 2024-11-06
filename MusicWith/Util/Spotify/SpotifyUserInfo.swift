@@ -5,7 +5,7 @@
 //  Created by kimhappy on 11/5/24.
 //
 
-struct UserInfo {
+struct SpotifyUserInfo {
     var name : String
     var image: String?
 }
