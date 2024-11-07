@@ -19,7 +19,7 @@ class Song {
         self.title    = "Song \(id)"
         self.artist   = "Artist \(id)"
         self.image    = "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228"
-        self.url      = "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3" // Testfile 이걸로 하니까 됩니다.
+        self.url      = "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3"
         self.lyric    = "This is Lyric of the song abcdefgasdfklshdfjwe;lfj;wejfj;walfjls;jdlfaskdjfkljslkdjfkl;sjlfj;sadk;fjsdjfk;asdklfj;sldfjk;asjdfkjsofhjwiefh;wehf;iwhe;fiuheiuwfhwejafljeaokfjojsf;sdljflsdjflsjafklsdjf;lsakfjsdkfj;laskdjfklsj;oewihfiuwheiu;fniweagwiokdfjhbjwiokfjnbhjwkfhbd hjdojhbwoijfb jeojkfnh"
 
     }
