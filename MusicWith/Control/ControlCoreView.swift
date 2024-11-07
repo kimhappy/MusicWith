@@ -12,6 +12,7 @@ struct ControlCoreView: View {
 
     var body: some View {
         if let state = controlState.playState {
+
             HStack {
                 AsyncImage(url: URL(string: state.song.image)) { image in
                     image
@@ -29,10 +30,53 @@ struct ControlCoreView: View {
                 }
                 VStack(alignment: .center) {
                     HStack {
+                        Button(action : controlState.playPrev) {
+                            Image(systemName: "backward.fill")
+                                .frame(width: 50, height: 50)
+                        }
+                        .padding(.horizontal, 5)
 
+
+                        Button(action : controlState.togglePlaying) {
+                            if state.isPlaying {
+                                Image(systemName: "pause")
+                                    .frame(width: 50, height: 50)
+                            }
+                            else {
+                                Image(systemName: "play")
+                                    .frame(width: 50, height: 50)
+                            }
+                        }
+                        .padding(.horizontal, 5)
+                        Button(action : controlState.playNext) {
+                            Image(systemName: "forward.fill")
+                                .frame(width: 50, height: 50)
+                        }
+                        .padding(.horizontal, 5)
                     }
-                    ProgressView(value: state.now, total: state.duration)
-                        .padding()
+                    .padding(.top, 30)
+
+
+
+                    Slider(value: Binding(get: {state.now}, set: {
+                        newNow in
+                        state.now = newNow
+
+                        if !controlState.isDragging {
+                            controlState.seek(newNow)
+                        }
+
+
+                    }) ,
+                           in: 0...state.duration,
+                           onEditingChanged: {
+                        isEditing in
+                        controlState.isDragging = isEditing
+                        if !isEditing {
+                            controlState.seek(state.now)
+                        }
+                    })
+                    .padding()
                 }
             }
             .padding()
