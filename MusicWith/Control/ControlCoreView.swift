@@ -12,7 +12,6 @@ struct ControlCoreView: View {
 
     var body: some View {
         if let state = controlState.playState {
-
             HStack {
                 AsyncImage(url: URL(string: state.song.image)) { image in
                     image
@@ -35,17 +34,9 @@ struct ControlCoreView: View {
                                 .frame(width: 50, height: 50)
                         }
                         .padding(.horizontal, 5)
-
-
                         Button(action : controlState.togglePlaying) {
-                            if state.isPlaying {
-                                Image(systemName: "pause")
-                                    .frame(width: 50, height: 50)
-                            }
-                            else {
-                                Image(systemName: "play")
-                                    .frame(width: 50, height: 50)
-                            }
+                            Image(systemName: state.isPlaying ? "pause" : "play")
+                                .frame(width: 50, height: 50)
                         }
                         .padding(.horizontal, 5)
                         Button(action : controlState.playNext) {
@@ -56,22 +47,18 @@ struct ControlCoreView: View {
                     }
                     .padding(.top, 30)
 
-
-
-                    Slider(value: Binding(get: {state.now}, set: {
-                        newNow in
+                    Slider(value: Binding(get: { state.now }, set: { newNow in
                         state.now = newNow
 
                         if !controlState.isDragging {
                             controlState.seek(newNow)
                         }
+                    }),
 
-
-                    }) ,
-                           in: 0...state.duration,
-                           onEditingChanged: {
-                        isEditing in
+                    in: 0...state.duration,
+                    onEditingChanged: { isEditing in
                         controlState.isDragging = isEditing
+
                         if !isEditing {
                             controlState.seek(state.now)
                         }

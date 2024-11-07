@@ -8,20 +8,20 @@
 import SwiftUI
 
 struct SearchView: View {
-    @State var searchedSongLists = PlayList(id: "temp").songs;
-    @State private var isSearched = false;
-    @State private var searchText = "";
-    
+    @State var searchedSongLists  = PlayList(id: "temp").songs
+    @State private var isSearched = false
+    @State private var searchText = ""
+
     // 최근 검색어, Optional
     @StateObject private var recentSearch = RecentSearch()
-    @StateObject var controlState = ControlState.shared
-    
+    @StateObject var controlState         = ControlState.shared
+
     var body: some View {
         VStack {
             Text("음악 검색")
                 .font(.title)
                 .padding(.top, 20)
-            
+
             TextField("Search :", text: $searchText)
                 .padding(7)
                 .padding(.horizontal, 25)
@@ -33,18 +33,17 @@ struct SearchView: View {
                             .foregroundColor(.gray)
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.leading, 8)
-                        
+
                         if !searchText.isEmpty {
                             Button(action: {
                                 deleteSearch()
-                                
                             }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(.gray)
                                     .padding(.trailing, 8)
                             }
                         }
-                        
+
                     }
                 )
                 .padding(.horizontal, 10)
@@ -56,9 +55,7 @@ struct SearchView: View {
                         isSearched = false
                     }
                 }
-        
-            
-            
+
             if isSearched {
                 ScrollView {
                     LazyVStack {
@@ -80,7 +77,6 @@ struct SearchView: View {
                             }
                             .padding(.vertical, 5)
                             .onTapGesture {
-                                // TODO: Fallback control
                                 controlState.setSong(song: song)
                             }
                         }
@@ -88,8 +84,6 @@ struct SearchView: View {
                 }
                 .padding(.horizontal)
             }
-            
-            
             // 최근 검색어, 필요 없다고 생각될 시 없애기
             else {
                 ScrollView {
@@ -99,7 +93,6 @@ struct SearchView: View {
                                 Text(term)
                                     .padding(.vertical, 8)
                                 Spacer()
-                                // 삭제 버튼
                                 Button(action: {
                                     deleteRecent(term)
                                 }) {
@@ -122,29 +115,29 @@ struct SearchView: View {
             }
         }
     }
-    
+
     private func deleteSearch() {
         searchText = ""
-        isSearched = false;
-        searchedSongLists = [];
+        isSearched = false
+        searchedSongLists = []
     }
-    
+
     private func sendSearch() {
-        isSearched = true;
-        
-        // Todo Implement Search and get Playlists
-        searchedSongLists = PlayList(id: "temp").songs;
+        isSearched = true
+
+        // TODO: Implement Search and get Playlists
+        searchedSongLists = PlayList(id: "temp").songs
         recentSearch.addRecentSearch(searchText)
     }
-    
+
     // Recent Search is Optional
     private func tapRecent(_ term : String) {
-        searchText = term;
-        isSearched = true;
+        searchText = term
+        isSearched = true
         // Todo Implement Search and get Playlists
-        searchedSongLists = PlayList(id: "temp").songs;
+        searchedSongLists = PlayList(id: "temp").songs
     }
-    
+
     private func deleteRecent(_ term : String) {
         recentSearch.deleteRecentSearch(term)
     }
