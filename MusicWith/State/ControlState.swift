@@ -12,8 +12,9 @@ class ControlState: ObservableObject {
     static var shared = ControlState()
     private init() {}
 
-    private var player      : AVPlayer? = nil
-    private var timeObserver: Any?      = nil
+    private var player      : AVPlayer?         = nil
+    private var timeObserver: Any?              = nil
+    private var endObserver : NSObjectProtocol? = nil
 
     @Published var playState: PlayState? = nil
     @Published var showSheet: Bool       = false {
@@ -57,52 +58,51 @@ class ControlState: ObservableObject {
             player?.removeTimeObserver(timeObserver)
         }
 
-        player      = nil
-        playState   = nil
-        playlist    = nil
-        musicIndex  = nil
+        if let endObserver {
+            NotificationCenter.default.removeObserver(endObserver)
+        }
+
+        player?.pause()
+        player       = nil
+        timeObserver = nil
+        endObserver  = nil
+        playState    = nil
+        playlist     = nil
+        musicIndex   = nil
     }
 
     private func startPlayback(song: Song, url: URL) {
-        player    = AVPlayer(url: url)
-        playState = PlayState(song: song)
+        let playerItem = AVPlayerItem(url: url)
+        player         = AVPlayer(playerItem: playerItem)
+        playState      = PlayState(song: song)
 
         guard let player, let playState else { return }
 
         playState.isPlaying = true
         playState.now       = 0.0
 
-        getDuration()
-        setNow()
-
-        player.play()
-    }
-
-    private func getDuration() {
-        guard let player, let playState,
-              let duration = player.currentItem?.asset.duration else { return }
-
+        guard let duration = player.currentItem?.asset.duration else { return }
         playState.duration = CMTimeGetSeconds(duration)
-    }
 
-    // FIXME: Slow?
-    private func setNow() {
-        guard let player, let playState else { return }
-        let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-
-        timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { time in
+        timeObserver = player.addPeriodicTimeObserver(
+            forInterval: CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC)),
+            queue      : .main) { time in
             if self.isDragging { return } // slider dragging 도중에는 now 갱신 안하도록
             playState.now = CMTimeGetSeconds(time)
-
             self.stateSynchronization()
+        }
 
-            // 음악이 끝나면 일시정지 상태로 변경
-            if playState.now >= playState.duration {
+        endObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object : playerItem,
+            queue  : .main) { _ in
                 playState.isPlaying = false
                 player.seek(to: .zero)
                 player.pause()
+                self.stateSynchronization()
             }
-        }
+
+        player.play()
     }
 
     func seek(_ time: Double) {
