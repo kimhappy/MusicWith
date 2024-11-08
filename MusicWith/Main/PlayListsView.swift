@@ -45,7 +45,8 @@ struct PlayListsView: View {
             .padding(.horizontal)
         }
         .task {
-            userName = await SpotifyAPI.userInfo()?.name ?? "나"
+            let me   = SpotifyUser(userId: nil)
+            userName = await me.name() ?? "나"
         }
     }
 }
