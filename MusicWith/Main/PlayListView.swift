@@ -8,16 +8,18 @@
 import SwiftUI
 
 struct PlayListView: View {
-    let playlist: PlayList
-
-    @StateObject var controlState = ControlState.shared
+    let playlist: SpotifyPlayList
+    @State var songList : [SpotifyTrack]    = []
+    @State var showNumber                   = 0;
+    @StateObject var controlState           = ControlState.shared
+    @State var playListName                 = ""
 
     var body: some View {
         ScrollView {
-            LazyVStack {
-                ForEach(playlist.songs, id: \.id) { song in
+            VStack {
+                ForEach(songList, id: \.trackId) { song in
                     HStack {
-                        AsyncImage(url: URL(string: song.image)) { image in
+                        AsyncImage(url: URL(string: song.imageURL ?? "")) { image in
                             image
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
@@ -27,22 +29,32 @@ struct PlayListView: View {
                             ProgressView()
                                 .frame(width: 50, height: 50)
                         }
-                        Text(song.title)
+                        Text(song.title ?? "")
                             .padding(.leading, 20)
                         Spacer()
                     }
                     .padding(.vertical, 5)
                     .onTapGesture {
                         // TODO: Fallback control
-                        controlState.setSong(song: song)
-                        controlState.setPlaylist(playlist, song)
-                        controlState.setMusicIndex(playlist, song)
+                        Task {
+                            await controlState.setSong(song: song)
+                            controlState.setPlaylist(playlist, song)
+                            await controlState.setMusicIndex(playlist, song)
+                        }
                     }
                 }
             }
         }
         .padding(.horizontal)
-        .navigationTitle(playlist.name)
+        .navigationTitle(playListName)
+        .task {
+            songList = await playlist.track(idx: showNumber)
+            playListName = await playlist.name() ?? "None"
+            for song in songList {
+                await song.name()
+                await song.imageUrl()
+            }
+        }
     }
 }
 

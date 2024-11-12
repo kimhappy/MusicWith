@@ -25,13 +25,14 @@ class ControlState: ObservableObject {
             }
         }
     }
-    @Published var sheetHeight: SheetHeight = .mini
-    @Published var isDragging               = false // slider dragging 추적
-    @Published var playlist   : PlayList?   = nil   // playlist 존재 여부 확인
-    @Published var musicIndex : Int?        = nil   // playlist 존재시 현재 음악의 index
+    @Published var sheetHeight: SheetHeight         = .mini
+    @Published var isDragging                       = false // slider dragging 추적
+    @Published var playlist   : SpotifyPlayList?    = nil   // playlist 존재 여부 확인
+    @Published var musicIndex : Int?                = nil   // playlist 존재시 현재 음악의 index
 
-    func setSong(song: Song) -> Bool {
-        guard let url = URL(string: song.url) else { return false }
+    func setSong(song : SpotifyTrack) async -> Bool {
+        await print(song.songUrl() ?? "")
+        guard let url = await URL(string: song.songUrl() ?? "") else { return false }
         showSheet     = true
         stopPlayback()
         startPlayback(song: song, url: url)
@@ -71,7 +72,7 @@ class ControlState: ObservableObject {
         musicIndex   = nil
     }
 
-    private func startPlayback(song: Song, url: URL) {
+    private func startPlayback(song: SpotifyTrack, url: URL) {
         let playerItem = AVPlayerItem(url: url)
         player         = AVPlayer(playerItem: playerItem)
         playState      = PlayState(song: song)
@@ -117,58 +118,58 @@ class ControlState: ObservableObject {
         self.playState   = newplayState
     }
 
-    func setPlaylist(_ list: PlayList, _ song: Song) {
+    func setPlaylist(_ list: SpotifyPlayList, _ song: SpotifyTrack) {
         self.playlist = list;
     }
 
-    func setMusicIndex(_ list: PlayList, _ song: Song) {
-        self.musicIndex = list.songs.firstIndex(where:  {
-            $0.id == song.id
+    func setMusicIndex(_ list: SpotifyPlayList, _ song: SpotifyTrack) async {
+        self.musicIndex = await list.track(idx: list.total()).firstIndex(where:  {
+            $0.trackId == song.trackId
         })
     }
 
     // playlist 없거나 song이 1개인 경우 자기 자신 재생하도록?
-    func playNext() {
+    func playNext() async {
         // 노래 중단된 경우
         guard let player, let playState else { return }
 
         // playlist 없을 시 자기 자신 재생
         guard let playlist = self.playlist else {
-            setSong(song: playState.song)
+            await setSong(song: playState.song)
             return
         }
 
         // list 있는데 music index 없는 경우
         // list 에 song이 0개인 경우
-        guard let musicIndex, !playlist.songs.isEmpty else { return } // error
+        guard let musicIndex, playlist.total() == 0 else { return } // error
 
-        let newIndex = (musicIndex + 1) % playlist.songs.count
-        let newSong  = playlist.songs[ newIndex ]
+        let newIndex = (musicIndex + 1) % playlist.total()
+        let newSong  = await playlist.track(idx: playlist.total())[ newIndex ]
 
-        setSong(song: newSong)
+        await setSong(song: newSong)
         setPlaylist(playlist, newSong)
         self.musicIndex = newIndex
         stateSynchronization()
     }
 
-    func playPrev() {
+    func playPrev() async {
         // 노래 중단된 경우
         guard let player, let playState else { return }
 
         // playlist 없을 시 자기 자신 재생
         guard let playlist else {
-            setSong(song: playState.song)
+            await setSong(song: playState.song)
             return
         }
 
         // list 있는데 music index 없는 경우
         // list 에 song이 0개인 경우
-        guard let musicIndex, !playlist.songs.isEmpty else { return } // error
+        guard let musicIndex, playlist.total() == 0 else { return } // error
 
-        let newIndex = (musicIndex - 1 + playlist.songs.count) % playlist.songs.count
-        let newSong  = playlist.songs[newIndex]
+        let newIndex = (musicIndex - 1 + playlist.total()) % playlist.total()
+        let newSong  = await playlist.track(idx: playlist.total())[newIndex]
 
-        setSong(song: newSong)
+        await setSong(song: newSong)
         setPlaylist(playlist, newSong)
         self.musicIndex = newIndex
         stateSynchronization()

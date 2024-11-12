@@ -15,7 +15,9 @@ class RecentSearch : ObservableObject {
     }
     
     func addRecentSearch(_ term : String) {
-        recentSearch.append(term)
+        if !recentSearch.contains(term) {
+            recentSearch.append(term)
+        }
     }
     
     func deleteRecentSearch(_ term : String) {
