@@ -42,6 +42,13 @@ struct PlayListView: View {
                             await controlState.setMusicIndex(playlist, song)
                         }
                     }
+                    .onAppear {
+                        Task {
+                            if song.trackId == songList[songList.count - 1].trackId {
+                                songList = await playlist.track(idx: showNumber)
+                            }
+                        }
+                    }
                 }
             }
         }

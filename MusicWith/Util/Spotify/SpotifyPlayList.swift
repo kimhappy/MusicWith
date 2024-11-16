@@ -71,7 +71,7 @@ class SpotifyPlayList {
             guard let json  = await getSpotifyJson(url)      ,
                   let items = json[ "items" ] as? [[String: Any]],
                   !items.isEmpty else {
-                return []
+                return _trackStorage
             }
 
             for item in items {
@@ -81,7 +81,11 @@ class SpotifyPlayList {
                       let album    = track        [ "album"  ] as?  [String: Any] ,
                       let images   = album        [ "images" ] as? [[String: Any]],
                       let imageUrl = images.first?[ "url"    ] as?   String else {
-                    return []
+                    return _trackStorage
+                }
+
+                if(_trackStorage.contains(where: {$0.trackId == trackId})) {
+                    break;
                 }
 
                 _trackStorage.append(SpotifyTrack(trackId: trackId, name: name, imageUrl: imageUrl))

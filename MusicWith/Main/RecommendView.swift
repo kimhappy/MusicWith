@@ -9,8 +9,7 @@ import SwiftUI
 
 struct RecommendView: View {
     @State var playLists : [SpotifyPlayList]    = [] // 추후 recommendList 구할 필요가 있다.
-    @State var showNumber                       = 10;
-    let increasingNum                           = 10;
+    @State var recommend : SpotifyRecommend?
 
     var body: some View {
         VStack {
@@ -20,11 +19,9 @@ struct RecommendView: View {
             ScrollView {
                 LazyVStack {
                     ForEach(playLists, id: \.playListId) { playlist in
-                        var imageUrl = ""
-                        var name = ""
                         NavigationLink(destination: PlayListView(playlist: playlist)) {
                             HStack {
-                                AsyncImage(url: URL(string: imageUrl)) { image in
+                                AsyncImage(url: URL(string: playlist.imageURL ?? "")) { image in
                                     image
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
@@ -34,19 +31,20 @@ struct RecommendView: View {
                                     ProgressView()
                                         .frame(width: 50, height: 50)
                                 }
-                                Text(name)
+                                Text(playlist.title ?? "Empty")
                                     .foregroundColor(.black)
                                     .padding(.leading, 20)
                                 Spacer()
                             }
                             .padding(.vertical, 5)
                         }
-                        .task {
-                            imageUrl = await playlist.imageUrls()?[0] ?? "image" // Image 1개만 필요?
-                            name = await playlist.name() ?? "Name"
-                        }
                         .onAppear {
-                            // Search에서 URL 확인 후에 구현
+                            Task {
+                                let lastIndex = playLists.count - 1
+                                if playlist.playListId == playLists[lastIndex].playListId {
+                                    playLists = await recommend?.playList(idx: 0) ?? []
+                                }
+                            }
                         }
                     }
                 }
@@ -54,9 +52,8 @@ struct RecommendView: View {
             .padding(.horizontal)
         }
         .task {
-            // Recommend Api 가져온 후에 변경
-            let me   = SpotifyUser(userId: nil)
-            playLists = await me.playList(idx: showNumber)
+            recommend = SpotifyRecommend()
+            playLists = await recommend?.playList(idx: 0) ?? []
         }
     }
 }
