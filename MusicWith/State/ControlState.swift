@@ -31,7 +31,6 @@ class ControlState: ObservableObject {
     @Published var musicIndex : Int?                = nil   // playlist 존재시 현재 음악의 index
 
     func setSong(song : SpotifyTrack) async -> Bool {
-        await print(song.songUrl() ?? "")
         guard let url = await URL(string: song.songUrl() ?? "") else { return false }
         showSheet     = true
         stopPlayback()

@@ -13,10 +13,10 @@ struct PlayListView: View {
     @State var showNumber                   = 0;
     @StateObject var controlState           = ControlState.shared
     @State var playListName                 = ""
-
+    @State private var isLoading            = false
     var body: some View {
         ScrollView {
-            VStack {
+            LazyVStack {
                 ForEach(songList, id: \.trackId) { song in
                     HStack {
                         AsyncImage(url: URL(string: song.imageURL ?? "")) { image in
