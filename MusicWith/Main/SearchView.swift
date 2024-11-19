@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct SearchView: View {
-    @State var searchedSongLists  = PlayList(id: "temp").songs
-    @State private var isSearched = false
-    @State private var searchText = ""
-
-    // 최근 검색어, Optional
-    @StateObject private var recentSearch = RecentSearch()
-    @StateObject var controlState         = ControlState.shared
+    @State var spotifySearch : SpotifySearch?
+    @State var searchedSongList : [SpotifyTrack]    = []
+    @State private var isSearched : Bool            = false // isSearched
+    @State private var searchText : String          = "" // 검색할 String
+    @State private var searchNum : Int              = 0; // Search Index 용도, 변화 X
+    @StateObject private var recentSearch           = RecentSearch()
+    @StateObject var controlState                   = ControlState.shared
 
     var body: some View {
         VStack {
@@ -48,7 +48,11 @@ struct SearchView: View {
                 )
                 .padding(.horizontal, 10)
                 .onSubmit {
-                    sendSearch()
+                    Task {
+                        if !searchText.isEmpty {
+                            await sendSearch()
+                        }
+                    }
                 }
                 .onChange(of: searchText) {
                     if searchText == "" {
@@ -59,9 +63,9 @@ struct SearchView: View {
             if isSearched {
                 ScrollView {
                     LazyVStack {
-                        ForEach(searchedSongLists, id: \.id) { song in
+                        ForEach(searchedSongList, id: \.trackId) { song in
                             HStack {
-                                AsyncImage(url: URL(string: song.image)) { image in
+                                AsyncImage(url: URL(string: song.imageURL ?? "")) { image in
                                     image
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
@@ -71,20 +75,31 @@ struct SearchView: View {
                                     ProgressView()
                                         .frame(width: 50, height: 50)
                                 }
-                                Text(song.title)
+                                Text(song.title ?? "None")
                                     .padding(.leading, 20)
                                 Spacer()
                             }
                             .padding(.vertical, 5)
                             .onTapGesture {
-                                controlState.setSong(song: song)
+                                Task {
+                                    await controlState.setSong(song: song)
+                                }
                             }
+                            .onAppear {
+                                Task {
+                                    // 무한 스크롤 구현 용도, 마지막 것이 출력되면 data 추가 요청
+                                    let lastIndex = searchedSongList.count - 1
+                                    if song.trackId == searchedSongList[lastIndex].trackId {
+                                        searchedSongList = await spotifySearch?.track(idx: searchNum) ?? []
+                                    }
+                                }
+                            }                            
                         }
                     }
                 }
                 .padding(.horizontal)
             }
-            // 최근 검색어, 필요 없다고 생각될 시 없애기
+
             else {
                 ScrollView {
                     LazyVStack(alignment: .leading) {
@@ -104,7 +119,9 @@ struct SearchView: View {
                             .background(Color(.systemBackground))
                             .cornerRadius(8)
                             .onTapGesture {
-                                tapRecent(term)
+                                Task {
+                                    await tapRecent(term)
+                                }
                             }
                             Divider()
                         }
@@ -119,23 +136,24 @@ struct SearchView: View {
     private func deleteSearch() {
         searchText = ""
         isSearched = false
-        searchedSongLists = []
+        spotifySearch = nil
+        searchedSongList = []
     }
 
-    private func sendSearch() {
-        isSearched = true
-
+    private func sendSearch() async {
         // TODO: Implement Search and get Playlists
-        searchedSongLists = PlayList(id: "temp").songs
+        spotifySearch = SpotifySearch(query: searchText)
+        searchedSongList = []
+        guard let searchSuccess = spotifySearch else {return }
+
+        searchedSongList = await searchSuccess.track(idx: searchNum)
         recentSearch.addRecentSearch(searchText)
+        isSearched = true
     }
 
-    // Recent Search is Optional
-    private func tapRecent(_ term : String) {
+    private func tapRecent(_ term : String) async{
         searchText = term
-        isSearched = true
-        // Todo Implement Search and get Playlists
-        searchedSongLists = PlayList(id: "temp").songs
+        await sendSearch()
     }
 
     private func deleteRecent(_ term : String) {

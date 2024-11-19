@@ -10,7 +10,7 @@
 // https://developer.spotify.com/documentation/web-api/reference/get-a-list-of-current-users-playlists
 // https://developer.spotify.com/documentation/web-api/reference/get-list-users-playlists
 class SpotifyUser {
-    private let CHUNK_SIZE: Int = 10
+    private let CHUNK_SIZE: Int = 15 // 10으로 할 시 한 화면에 다 담겨져서 오류 생기는 듯?
 
     private var _storage        : [String: Any    ] = [:]
     private var _playListStorage: [SpotifyPlayList] = []
@@ -52,34 +52,37 @@ class SpotifyUser {
         return await load(key: "imageUrl") as? String
     }
 
-    func playList(idx: Int) async -> SpotifyPlayList? {
+    func playList(idx: Int) async -> [SpotifyPlayList] {
         repeat {
             guard let json  = await getSpotifyJson("https://api.spotify.com/v1/\(userId.map { "users/\($0)" } ?? "me")/playlists?offset=\(_playListStorage.count)&limit=\(CHUNK_SIZE)"),
                   let items = json[ "items" ] as? [[String: Any]] else {
-                return nil
+                return []
             }
 
+            // images 는 Null 값으로 전달 받는 경우 있어 밑에도 변경
             for item in items {
                 guard let playListId = item[ "id"     ] as?   String,
-                      let name       = item[ "name"   ] as?   String,
-                      let images     = item[ "images" ] as? [[String: Any]] else {
-                    return nil
+                      let name       = item[ "name"   ] as?   String  else {
+                    return []
                 }
-
+                // 알고리즘 상 수정 필요? 현재는 중복 플레이리스트 막는 용도 -> 추후에 ID List Set을 만들어서 더 효율적으로 적용 가능할 듯
+                if(_playListStorage.contains(where: {$0.playListId == playListId})) {
+                    break;
+                }
+                
                 var imageUrls: [String] = []
-
-                for image in images {
-                    guard let url = image[ "url" ] as? String else {
-                        return nil
+                if let images = item[ "images" ] as? [[String : Any]] {
+                    for image in images {
+                        let url = image[ "url" ] as? String
+                        imageUrls.append(url ?? "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228")
                     }
-
-                    imageUrls.append(url)
+                } else {
+                    imageUrls.append("https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228")
                 }
 
                 _playListStorage.append(SpotifyPlayList(playListId: playListId, name: name, imageUrls: imageUrls))
             }
         } while (idx >= _playListStorage.count)
-
-        return _playListStorage[ idx ]
+        return _playListStorage
     }
 }

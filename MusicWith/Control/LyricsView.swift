@@ -9,7 +9,8 @@ import SwiftUI
 
 struct LyricsView: View {
     @StateObject var controlState = ControlState.shared
-
+    @State var lyric = ""
+    
     var body: some View {
         if let state = controlState.playState {
             VStack {
@@ -17,11 +18,14 @@ struct LyricsView: View {
                     .padding(.top, 30)
                     .font(.system(size: 20, weight: .semibold))
                 ScrollView {
-                    Text(state.song.lyric)
+                    Text(lyric)
                         .lineSpacing(30)
                         .offset(y:30)
                         .padding(30)
                 }
+            }
+            .task {
+                lyric = await state.song.lyric() ?? ""
             }
         }
     }

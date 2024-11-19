@@ -9,11 +9,13 @@ import SwiftUI
 
 struct ControlCoreView: View {
     @StateObject var controlState = ControlState.shared
+    @State var songName = ""
+    @State var songImageUrl = ""
 
     var body: some View {
         if let state = controlState.playState {
             HStack {
-                AsyncImage(url: URL(string: state.song.image)) { image in
+                AsyncImage(url: URL(string: songImageUrl)) { image in
                     image
                         .resizable()
                         .frame(width: 50, height: 50)
@@ -22,14 +24,16 @@ struct ControlCoreView: View {
                         .frame(width: 50, height: 50)
                 }
                 VStack(alignment: .leading) {
-                    Text(state.song.title)
+                    Text(songName)
                         .font(.headline)
-                    Text(state.song.artist)
+                    Text("artist 추가 필요") // Artist
                         .font(.subheadline)
                 }
                 VStack(alignment: .center) {
                     HStack {
-                        Button(action : controlState.playPrev) {
+                        Button(action : {
+                            Task {controlState.playPrev}
+                        }) {
                             Image(systemName: "backward.fill")
                                 .frame(width: 50, height: 50)
                         }
@@ -39,7 +43,9 @@ struct ControlCoreView: View {
                                 .frame(width: 50, height: 50)
                         }
                         .padding(.horizontal, 5)
-                        Button(action : controlState.playNext) {
+                        Button(action : {
+                            Task {controlState.playNext}
+                        }) {
                             Image(systemName: "forward.fill")
                                 .frame(width: 50, height: 50)
                         }
@@ -65,6 +71,10 @@ struct ControlCoreView: View {
                     })
                     .padding()
                 }
+            }
+            .task {
+                songName = await state.song.name() ?? ""
+                songImageUrl = await state.song.imageUrl() ?? ""
             }
             .padding()
         }
