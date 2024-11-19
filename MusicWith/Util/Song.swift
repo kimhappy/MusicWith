@@ -13,7 +13,7 @@ class Song {
     let image   : String
     let url     : String
     let lyric   : String
-    
+
     init(id: String) {
         self.id       = id
         self.title    = "Song \(id)"

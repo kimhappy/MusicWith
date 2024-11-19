@@ -12,7 +12,7 @@ class PlayList {
     let name : String
     let image: String
     var songs: [Song]
-    
+
     static func myPlayLists() -> [PlayList] {
         return [
             PlayList(id: "1000"),
@@ -37,7 +37,7 @@ class PlayList {
             PlayList(id: "2900"),
         ]
     }
-    
+
     static func recommendPlayLists() -> [PlayList] {
         return [
             PlayList(id: "3000"),
@@ -62,7 +62,7 @@ class PlayList {
             PlayList(id: "4900"),
         ]
     }
-    
+
     init(id: String) {
         self.id    = id
         self.name  = "PlayList \(id)"
@@ -90,10 +90,10 @@ class PlayList {
             Song(id: "290"),
         ]
     }
-    
+
     func reserve(size: Int) {
         if songs.count >= size { return }
-        
+
         for i in songs.count..<size {
             songs.append(Song(id: "\(i)"))
         }

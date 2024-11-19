@@ -8,12 +8,12 @@
 import SwiftUI
 
 class PlayState {
-    var song     : Song
+    var song     : SpotifyTrack
     var isPlaying: Bool
     var duration : Double
     var now      : Double
-    
-    init(song: Song) {
+
+    init(song: SpotifyTrack) {
         self.song      = song
         self.isPlaying = false
         self.duration  = 123

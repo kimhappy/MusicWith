@@ -10,7 +10,7 @@ import SwiftUI
 enum SheetHeight {
     case mini
     case full
-    
+
     func detent() -> PresentationDetent {
         switch self {
         case .mini: PresentationDetent.fraction(0.15)

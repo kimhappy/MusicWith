@@ -13,7 +13,7 @@ struct MainView: View {
 
     @StateObject private var controlState = ControlState    .shared
     @StateObject private var authState    = SpotifyAuthState.shared
-    
+
     var body: some View {
         if authState.isLoggedIn {
             VStack(spacing: 0) {

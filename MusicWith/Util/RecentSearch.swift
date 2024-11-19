@@ -1,3 +1,9 @@
+//
+//  RecentSearch.swift
+//  MusicWith
+//
+//  Created by kimhappy on 10/30/24.
+//
 
 import SwiftUI
 
@@ -9,7 +15,9 @@ class RecentSearch : ObservableObject {
     }
     
     func addRecentSearch(_ term : String) {
-        recentSearch.append(term)
+        if !recentSearch.contains(term) {
+            recentSearch.append(term)
+        }
     }
     
     func deleteRecentSearch(_ term : String) {

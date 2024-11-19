@@ -12,32 +12,31 @@ import SwiftUI
 class SpotifyAuthState: ObservableObject {
     static var shared = SpotifyAuthState()
     private init() {}
-    
+
     @Published var isLoggedIn = false
     @Published var userName   = ""
 
     var accessToken : String?
     var refreshToken: String?
 
-
     func login() {
         guard let url = URL(string: "http://localhost:8000/login") else { return }
         UIApplication.shared.open(url)
     }
-    
+
     func logout() {
         isLoggedIn   = false
         userName     = ""
         accessToken  = nil
         refreshToken = nil
     }
-    
+
     func handleRedirect(_ url: URL) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
               let queryItems = components.queryItems else {
             return
         }
-        
+
         for item in queryItems {
             if item.name == "access_token" {
                 accessToken = item.value
@@ -51,8 +50,8 @@ class SpotifyAuthState: ObservableObject {
             isLoggedIn = true
         }
         else {
-            accessToken   = nil
-            refreshToken  = nil
+            accessToken  = nil
+            refreshToken = nil
         }
     }
 }

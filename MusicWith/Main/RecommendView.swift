@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct RecommendView: View {
-    let recommendPlayLists = PlayList.recommendPlayLists()
-    
+    @State var playLists : [SpotifyPlayList]    = [] // 추후 recommendList 구할 필요가 있다.
+    @State var recommend : SpotifyRecommend?
+
     var body: some View {
         VStack {
             Text("추천 플레이리스트")
@@ -17,10 +18,10 @@ struct RecommendView: View {
                 .padding(.top, 20)
             ScrollView {
                 LazyVStack {
-                    ForEach(recommendPlayLists, id: \.id) { playlist in
+                    ForEach(playLists, id: \.playListId) { playlist in
                         NavigationLink(destination: PlayListView(playlist: playlist)) {
                             HStack {
-                                AsyncImage(url: URL(string: playlist.image)) { image in
+                                AsyncImage(url: URL(string: playlist.imageURL ?? "")) { image in
                                     image
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
@@ -30,17 +31,29 @@ struct RecommendView: View {
                                     ProgressView()
                                         .frame(width: 50, height: 50)
                                 }
-                                Text(playlist.name)
+                                Text(playlist.title ?? "Empty")
                                     .foregroundColor(.black)
                                     .padding(.leading, 20)
                                 Spacer()
                             }
                             .padding(.vertical, 5)
                         }
+                        .onAppear {
+                            Task {
+                                let lastIndex = playLists.count - 1
+                                if playlist.playListId == playLists[lastIndex].playListId {
+                                    playLists = await recommend?.playList(idx: 0) ?? []
+                                }
+                            }
+                        }
                     }
                 }
             }
             .padding(.horizontal)
+        }
+        .task {
+            recommend = SpotifyRecommend()
+            playLists = await recommend?.playList(idx: 0) ?? []
         }
     }
 }

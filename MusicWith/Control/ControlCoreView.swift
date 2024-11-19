@@ -9,12 +9,13 @@ import SwiftUI
 
 struct ControlCoreView: View {
     @StateObject var controlState = ControlState.shared
+    @State var songName = ""
+    @State var songImageUrl = ""
 
     var body: some View {
         if let state = controlState.playState {
-            
             HStack {
-                AsyncImage(url: URL(string: state.song.image)) { image in
+                AsyncImage(url: URL(string: songImageUrl)) { image in
                     image
                         .resizable()
                         .frame(width: 50, height: 50)
@@ -23,61 +24,57 @@ struct ControlCoreView: View {
                         .frame(width: 50, height: 50)
                 }
                 VStack(alignment: .leading) {
-                    Text(state.song.title)
+                    Text(songName)
                         .font(.headline)
-                    Text(state.song.artist)
+                    Text("artist 추가 필요") // Artist
                         .font(.subheadline)
                 }
                 VStack(alignment: .center) {
                     HStack {
-                        Button(action : controlState.playPrev) {
+                        Button(action : {
+                            Task {controlState.playPrev}
+                        }) {
                             Image(systemName: "backward.fill")
                                 .frame(width: 50, height: 50)
                         }
                         .padding(.horizontal, 5)
-                       
-                        
                         Button(action : controlState.togglePlaying) {
-                            if state.isPlaying {
-                                Image(systemName: "pause")
-                                    .frame(width: 50, height: 50)
-                            }
-                            else {
-                                Image(systemName: "play")
-                                    .frame(width: 50, height: 50)
-                            }
+                            Image(systemName: state.isPlaying ? "pause" : "play")
+                                .frame(width: 50, height: 50)
                         }
                         .padding(.horizontal, 5)
-                        Button(action : controlState.playNext) {
+                        Button(action : {
+                            Task {controlState.playNext}
+                        }) {
                             Image(systemName: "forward.fill")
                                 .frame(width: 50, height: 50)
                         }
                         .padding(.horizontal, 5)
                     }
                     .padding(.top, 30)
-                    
-                    
-                    
-                    Slider(value: Binding(get: {state.now}, set: {
-                        newNow in
+
+                    Slider(value: Binding(get: { state.now }, set: { newNow in
                         state.now = newNow
-                        
+
                         if !controlState.isDragging {
                             controlState.seek(newNow)
                         }
-                         
-                        
-                    }) ,
-                           in: 0...state.duration,
-                           onEditingChanged: {
-                        isEditing in
+                    }),
+
+                    in: 0...state.duration,
+                    onEditingChanged: { isEditing in
                         controlState.isDragging = isEditing
+
                         if !isEditing {
                             controlState.seek(state.now)
                         }
                     })
                     .padding()
                 }
+            }
+            .task {
+                songName = await state.song.name() ?? ""
+                songImageUrl = await state.song.imageUrl() ?? ""
             }
             .padding()
         }
