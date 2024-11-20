@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct PlayListsView: View {
-    @State var userName: String                 = ""
+    @State var userName  : String               = ""
     @State var playLists : [SpotifyPlayList]    = []
-    @State var showNumber                       = -1;
-    @State var me : SpotifyUser? // State로 두어야 무한 스크롤의 결과가 바로 표시됨
+    @State var showNumber                       = -1
+    @State var me        : SpotifyUser? // State로 두어야 무한 스크롤의 결과가 바로 표시됨
 
     var body: some View {
         VStack {
@@ -56,8 +56,9 @@ struct PlayListsView: View {
         }
         .task {
             self.me = SpotifyUser(userId: nil)
-            if let me = me{
-                userName = await me.name() ?? "나"
+
+            if let me = me {
+                userName  = await me.name() ?? "나"
                 playLists = await me.playList(idx: showNumber)
             }
         }

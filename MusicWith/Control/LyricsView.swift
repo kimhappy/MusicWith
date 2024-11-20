@@ -9,8 +9,8 @@ import SwiftUI
 
 struct LyricsView: View {
     @StateObject var controlState = ControlState.shared
-    @State var lyric = ""
-    
+    @State       var lyric        = ""
+
     var body: some View {
         if let state = controlState.playState {
             VStack {

@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct RecommendView: View {
-    @State var playLists : [SpotifyPlayList]    = [] // 추후 recommendList 구할 필요가 있다.
-    @State var recommend : SpotifyRecommend?
+    @State var playLists: [SpotifyPlayList] = [] // TODO: recommendList 구해야함
+    @State var recommend: SpotifyRecommend?
 
     var body: some View {
         VStack {
@@ -41,7 +41,8 @@ struct RecommendView: View {
                         .onAppear {
                             Task {
                                 let lastIndex = playLists.count - 1
-                                if playlist.playListId == playLists[lastIndex].playListId {
+
+                                if playlist.playListId == playLists[ lastIndex ].playListId {
                                     playLists = await recommend?.playList(idx: 0) ?? []
                                 }
                             }

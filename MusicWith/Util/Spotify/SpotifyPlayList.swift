@@ -16,7 +16,7 @@ class SpotifyPlayList {
     let playListId: String
     let imageURL : String?
     let title : String?
-    
+
     init(playListId: String, name: String? = nil, imageUrls: [String]? = nil) {
         self.playListId              = playListId
         self._storage[ "name"      ] = name
@@ -94,6 +94,7 @@ class SpotifyPlayList {
 
         return _trackStorage
     }
+
     // 현재 playlist 내부 음악이 몇 개인지 알 필요가 있음
     func total() -> Int {
         return _trackStorage.count

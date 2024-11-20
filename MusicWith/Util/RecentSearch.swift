@@ -9,19 +9,19 @@ import SwiftUI
 
 class RecentSearch : ObservableObject {
     @Published var recentSearch: [String]
-    
+
     func myRecentSearch() -> [String] {
         return recentSearch;
     }
-    
+
     func addRecentSearch(_ term : String) {
         if !recentSearch.contains(term) {
             recentSearch.append(term)
         }
     }
-    
+
     func deleteRecentSearch(_ term : String) {
-        recentSearch.removeAll{$0 == term}
+        recentSearch.removeAll { $0 == term }
     }
 
     init() {

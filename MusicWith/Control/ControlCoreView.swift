@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ControlCoreView: View {
     @StateObject var controlState = ControlState.shared
-    @State var songName = ""
-    @State var songImageUrl = ""
+    @State       var songName     = ""
+    @State       var songImageUrl = ""
 
     var body: some View {
         if let state = controlState.playState {
