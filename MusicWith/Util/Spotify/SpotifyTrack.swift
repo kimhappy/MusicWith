@@ -15,10 +15,11 @@ class SpotifyTrack {
     let imageURL: String? // storage 에 넣은 후 함수로 받아올 경우 무한 loading 이 걸림 => await 안 쓰게 구현시도
     let title   : String?
 
-    init(trackId: String, name: String? = nil, imageUrl: String? = nil, songUrl: String? = nil, lyric: String? = nil) {
+    init(trackId: String, name: String? = nil, artist: String? = nil, imageUrl: String? = nil, songUrl: String? = nil, lyric: String? = nil) {
         self.trackId                = trackId
         self._lyric                 = lyric
         self._storage[ "name"     ] = name
+        self._storage[ "artist"   ] = artist
         self._storage[ "imageUrl" ] = imageUrl
         self._storage[ "songUrl"  ] = songUrl
         self.imageURL               = imageUrl
@@ -34,6 +35,7 @@ class SpotifyTrack {
 
         guard let json     = await getSpotifyJson(url),
               let name     = json         [ "name"        ] as?   String       ,
+              let artists  = json         [ "artists"     ] as? [[String: Any]],
               let album    = json         [ "album"       ] as?  [String: Any] ,
               let images   = album        [ "images"      ] as? [[String: Any]],
               let imageUrl = images.first?[ "url"         ] as?   String       ,
@@ -41,9 +43,20 @@ class SpotifyTrack {
             return nil
         }
 
+        var artistNames: [String] = []
+
+        for artist in artists {
+            guard let name = artist[ "name" ] as? String else {
+                return nil
+            }
+
+            artistNames.append(name)
+        }
+
         _storage = [
-            "name"    : name    ,
-            "imageUrl": imageUrl,
+            "name"    : name                               ,
+            "artist"  : artistNames.joined(separator: ", "),
+            "imageUrl": imageUrl                           ,
             "songUrl" : songUrl
         ]
 
@@ -52,6 +65,10 @@ class SpotifyTrack {
 
     func name() async -> String? {
         return await load(key: "name") as? String
+    }
+
+    func artist() async -> String? {
+        return await load(key: "artist") as? String
     }
 
     func imageUrl() async -> String? {

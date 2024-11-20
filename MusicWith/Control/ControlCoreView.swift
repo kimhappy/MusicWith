@@ -10,6 +10,7 @@ import SwiftUI
 struct ControlCoreView: View {
     @StateObject var controlState = ControlState.shared
     @State       var songName     = ""
+    @State       var songArtist   = ""
     @State       var songImageUrl = ""
 
     var body: some View {
@@ -26,13 +27,13 @@ struct ControlCoreView: View {
                 VStack(alignment: .leading) {
                     Text(songName)
                         .font(.headline)
-                    Text("artist 추가 필요") // Artist
+                    Text(songArtist)
                         .font(.subheadline)
                 }
                 VStack(alignment: .center) {
                     HStack {
                         Button(action : {
-                            Task {controlState.playPrev}
+                            Task { controlState.playPrev }
                         }) {
                             Image(systemName: "backward.fill")
                                 .frame(width: 50, height: 50)
@@ -73,7 +74,8 @@ struct ControlCoreView: View {
                 }
             }
             .task {
-                songName = await state.song.name() ?? ""
+                songName     = await state.song.name    () ?? ""
+                songArtist   = await state.song.artist  () ?? ""
                 songImageUrl = await state.song.imageUrl() ?? ""
             }
             .padding()
