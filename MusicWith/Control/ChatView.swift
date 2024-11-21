@@ -8,6 +8,10 @@
 import SwiftUI
 import Combine
 
+/*class MyChat: ObservableObject {
+    @Published var chattings: [Chat] = []
+}*/
+
 struct ChatView: View {
     @StateObject var controlState = ControlState.shared
     @ObservedObject var networkService = NetworkService.shared
@@ -17,17 +21,18 @@ struct ChatView: View {
     @State private var globalTestId    : Int    = 2
 
     //서버에서 해당 곡에 대한 채팅 목록을 불러오도록 구현해야 함
-    @State public var chats: [Chat] = [Chat(id: 1, user: "dummyuser", text: "hi", timeSong: 2, parentId: nil)]
+    @State var chats: [Chat] = [Chat(id: 1, user: "dummyuser", text: "hi", timeSong: 2, parentId: nil)]
 
     
     var body: some View {
         VStack {
+            //let _ = print(chats.chattings)
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(chats, id:\.id) { chatting in
                         HStack {
                             if chatting.parentId == nil {
-                                Text(chatting.text)
+                                Text(chatting.text ?? "deleted")
                                     .padding()
                                     .background(Color.green)
                                     .foregroundColor(.white)
@@ -37,7 +42,8 @@ struct ChatView: View {
                                         selectedParentId = chatting.id
                                     }
                                 Spacer()
-                                Text(String(chatting.timeSong))
+                                chatting.timeSong.map { Text(String($0)) }
+                                //Text(String(chatting.timeSong))
                                     .font(.system(size:15))
 
                             }
@@ -48,7 +54,7 @@ struct ChatView: View {
                                 HStack {
                                     Text("ㄴ")
 
-                                    Text(chat2.text)
+                                    Text(chat2.text ?? "deleted")
                                         .padding()
                                         .background(Color.blue)
                                         .foregroundColor(.white)
@@ -96,9 +102,13 @@ struct ChatView: View {
             .padding()
         }
         .task {
-            networkService.connect(trackID: "100", userID: "testapp")
+            await networkService.connect(trackID: "100", userID: "testapp", chats: $chats)
+        }
+        .onDisappear {
+            networkService.disconnect()
         }
     }
+    
 
     private func sendMessage() {
         if messageText.isEmpty {

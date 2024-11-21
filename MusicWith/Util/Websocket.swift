@@ -6,9 +6,9 @@
 //
 
 import Foundation
+import SwiftUI
 
 class NetworkService: ObservableObject {
-    
     static let shared = NetworkService()
     private var webSocketTask: URLSessionWebSocketTask?
     
@@ -60,17 +60,22 @@ class NetworkService: ObservableObject {
         }
     }
     
-    func connect(trackID: String, userID: String) {
+    func connect(trackID: String, userID: String, chats: Binding<[Chat]>) async {
         guard let url = URL(string: "ws://127.0.0.1:8000/chat/\(trackID)/\(userID)") else {return}
         let request = URLRequest(url: url)
         webSocketTask = URLSession.shared.webSocketTask(with: request)
         webSocketTask?.resume()
         //self.startPing()
-        receiveMessage()
+        receiveMessage(chats: chats)
         
     }
     
-    private func receiveMessage() {
+    func disconnect() {
+        webSocketTask?.cancel(with: .goingAway, reason: nil)
+        webSocketTask = nil
+    }
+    
+    private func receiveMessage(chats: Binding<[Chat]>) {
         webSocketTask?.receive(completionHandler: { [weak self] result in
             switch result {
             case.failure(let error):
@@ -78,27 +83,29 @@ class NetworkService: ObservableObject {
             case.success(let message):
                 switch message {
                 case.string(let stringMessage):
-                    self?.handleMessage(stringMessage)
+                    self?.handleMessage(stringMessage, chats: chats)
                 case.data:
                     break
                 @unknown default:
                     break
                 }
             }
-            self?.receiveMessage()
+            self?.receiveMessage(chats: chats)
         })
     }
     
     
-    private func handleMessage(_ message: String) {
+    private func handleMessage(_ message: String, chats: Binding<[Chat]>) {
         let json = message.data(using: .utf8)!
         
         print(message)
         
         if(message.contains("Chat")) {
             guard let info = try? JSONDecoder().decode(ChatNotice.self, from: json) else {return}
+            let newChat = Chat(id: info.Chat.chat_id, user: info.Chat.user_id, text: info.Chat.content, timeSong: 10, parentId: info.Chat.reply_to)
+            chats.wrappedValue.append(newChat)
+            print(ChatView().chats)
             
-            print("Chat response received")
         }
         if(message.contains("Delete")) {
             guard let info = try? JSONDecoder().decode(DeleteNotice.self, from: json) else {return}
