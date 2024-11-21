@@ -10,15 +10,16 @@ import Combine
 
 struct ChatView: View {
     @StateObject var controlState = ControlState.shared
-
+    @ObservedObject var networkService = NetworkService.shared
     @State private var messageText     : String = ""
     @State private var isSelected      : Bool   = false
     @State private var selectedParentId: Int?   = nil
     @State private var globalTestId    : Int    = 2
 
     //서버에서 해당 곡에 대한 채팅 목록을 불러오도록 구현해야 함
-    @State private var chats: [Chat] = [Chat(id: 1, user: "dummyuser", text: "hi", timeSong: 2, parentId: nil)]
+    @State public var chats: [Chat] = [Chat(id: 1, user: "dummyuser", text: "hi", timeSong: 2, parentId: nil)]
 
+    
     var body: some View {
         VStack {
             ScrollView {
@@ -93,6 +94,9 @@ struct ChatView: View {
                 }
             }
             .padding()
+        }
+        .task {
+            networkService.connect(trackID: "100", userID: "testapp")
         }
     }
 

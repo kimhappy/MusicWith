@@ -25,6 +25,7 @@ struct LyricsView: View {
                 }
             }
             .task {
+                let _ = print(SpotifyAuthState.shared.accessToken)
                 lyric = await state.song.lyric() ?? ""
             }
         }
