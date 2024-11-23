@@ -12,6 +12,6 @@ struct Chat: Identifiable {
     let id      : Int
     let user    : String // sending user
     let text    : String? // text
-    let timeSong: Double? // chatted playtime of the song
+    let timeSong: Int? // chatted playtime of the song
     let parentId: Int?
 }

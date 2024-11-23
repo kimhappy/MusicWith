@@ -53,11 +53,33 @@ class NetworkService: ObservableObject {
             let reply_to: Int?
         }
     }
-    struct OnlineUser: Decodable {
+    struct OnlineUserResponse: Decodable {
         let Online: OnlineUserList
         struct OnlineUserList: Decodable {
             let items: [String]
         }
+    }
+    
+    struct AskChat: Encodable {
+        let Chat: ChatInfo
+        struct ChatInfo: Encodable {
+            let time: Int
+            let content: String
+        }
+    }
+    struct AskDelete: Encodable {
+        let Delete: DeleteChatID
+        struct DeleteChatID: Encodable {
+            let chat_id: Int
+        }
+    }
+    struct AskHistory: Encodable {
+        let History: Temp
+        struct Temp: Encodable { }
+    }
+    struct AskOnlineUser: Encodable {
+        let Online: Temp
+        struct Temp: Encodable { }
     }
     
     func connect(trackID: String, userID: String, chats: Binding<[Chat]>) async {
@@ -102,10 +124,8 @@ class NetworkService: ObservableObject {
         
         if(message.contains("Chat")) {
             guard let info = try? JSONDecoder().decode(ChatNotice.self, from: json) else {return}
-            let newChat = Chat(id: info.Chat.chat_id, user: info.Chat.user_id, text: info.Chat.content, timeSong: 10, parentId: info.Chat.reply_to)
+            let newChat = Chat(id: info.Chat.chat_id, user: info.Chat.user_id, text: info.Chat.content, timeSong: info.Chat.time, parentId: info.Chat.reply_to)
             chats.wrappedValue.append(newChat)
-            print(ChatView().chats)
-            
         }
         if(message.contains("Delete")) {
             guard let info = try? JSONDecoder().decode(DeleteNotice.self, from: json) else {return}
@@ -121,15 +141,46 @@ class NetworkService: ObservableObject {
         }
         if(message.contains("History")) {
             guard let info = try? JSONDecoder().decode(HistoryResponse.self, from: json) else {return}
-            print("History response received")
+            for item in info.History.items {
+                let historyChat = Chat(id: item.chat_id, user: item.user_id, text: item.content, timeSong: item.time, parentId: item.reply_to)
+                chats.wrappedValue.append(historyChat)
+            }
         }
         if(message.contains("Online")) {
-            guard let info = try? JSONDecoder().decode(OnlineUser.self, from: json) else {return}
+            guard let info = try? JSONDecoder().decode(OnlineUserResponse.self, from: json) else {return}
             print("Online response received")
         }
     }
     
-    private func sendMessage() {
+    
+    func sendChat(time: Int, content: String) {
+        let msg = AskChat(Chat: AskChat.ChatInfo(time: time, content: content))
+        guard let json = try? JSONEncoder().encode(msg) else {
+            return
+        }
+        let message = String(data: json, encoding: .utf8)!
+        webSocketTask?.send(.string(message), completionHandler: {error in
+            if let error = error {
+                print(error.localizedDescription)
+            }
+        })
+    }
+    func askDelete() {
+            
+    }
+    func askHistory() {
+        let msg = AskHistory(History: AskHistory.Temp())
+        guard let json = try? JSONEncoder().encode(msg) else {
+            return
+        }
+        let message = String(data: json, encoding: .utf8)!
+        webSocketTask?.send(.string(message), completionHandler: {error in
+            if let error = error {
+                print(error.localizedDescription)
+            }
+        })
+    }
+    func askOnline() {
         
     }
 }

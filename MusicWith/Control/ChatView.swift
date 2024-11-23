@@ -18,15 +18,12 @@ struct ChatView: View {
     @State private var messageText     : String = ""
     @State private var isSelected      : Bool   = false
     @State private var selectedParentId: Int?   = nil
-    @State private var globalTestId    : Int    = 2
 
-    //서버에서 해당 곡에 대한 채팅 목록을 불러오도록 구현해야 함
-    @State var chats: [Chat] = [Chat(id: 1, user: "dummyuser", text: "hi", timeSong: 2, parentId: nil)]
+    @State var chats: [Chat] = []
 
     
     var body: some View {
         VStack {
-            //let _ = print(chats.chattings)
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(chats, id:\.id) { chatting in
@@ -103,24 +100,22 @@ struct ChatView: View {
         }
         .task {
             await networkService.connect(trackID: "100", userID: "testapp", chats: $chats)
+            networkService.askHistory()
         }
         .onDisappear {
             networkService.disconnect()
+            chats = []
         }
     }
     
-
     private func sendMessage() {
         if messageText.isEmpty {
             return
         }
-
-        chats.append(Chat(id: globalTestId, user: "user", text: messageText, timeSong: controlState.playState!.now, parentId: selectedParentId))
-
+        networkService.sendChat(time: Int(controlState.playState!.now), content: messageText)
         messageText       = ""
         isSelected        = false
         selectedParentId  = nil
-        globalTestId     += 1
     }
 }
 
