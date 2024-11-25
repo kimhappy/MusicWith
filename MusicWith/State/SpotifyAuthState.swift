@@ -6,17 +6,50 @@
 //
 
 import SwiftUI
+import KeychainSwift
 
-// TODO: Save token and session id into the safe storage
 class SpotifyAuthState: ObservableObject {
-    static var shared = SpotifyAuthState()
-    private init() {}
+    static var shared    = SpotifyAuthState()
+    private let keychain = KeychainSwift(keyPrefix: "com.kimhappy.musicwith.")
+
+    private init() {
+        sessionId   = keychain.get("sessionId"  )
+        accessToken = keychain.get("accessToken")
+
+        if sessionId != nil && accessToken != nil {
+            isLoggedIn = true
+        }
+        else {
+            sessionId   = nil
+            accessToken = nil
+        }
+    }
 
     @Published var isLoggedIn = false
 
-    var state      : String?
-    var accessToken: String?
-    var sessionId  : String?
+    var state: String?
+
+    var accessToken: String? {
+        didSet {
+            if let token = accessToken {
+                keychain.set(token, forKey: "accessToken")
+            }
+            else {
+                keychain.delete("accessToken")
+            }
+        }
+    }
+
+    var sessionId: String? {
+        didSet {
+            if let id = sessionId {
+                keychain.set(id, forKey: "sessionId")
+            }
+            else {
+                keychain.delete("sessionId")
+            }
+        }
+    }
 
     func login() {
         state         = UUID().uuidString
