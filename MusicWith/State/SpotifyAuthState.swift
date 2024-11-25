@@ -18,6 +18,10 @@ class SpotifyAuthState: ObservableObject {
 
         if sessionId != nil && accessToken != nil {
             isLoggedIn = true
+
+            Task {
+                await tokenRefresh()
+            }
         }
         else {
             sessionId   = nil
