@@ -7,51 +7,72 @@
 
 import SwiftUI
 
-// TODO: Token Refresh
-// TODO: Save tokens into the safe storage
+// TODO: Save token and session id into the safe storage
 class SpotifyAuthState: ObservableObject {
     static var shared = SpotifyAuthState()
     private init() {}
 
     @Published var isLoggedIn = false
-    @Published var userName   = ""
 
-    var accessToken : String?
-    var refreshToken: String?
+    var state      : String?
+    var accessToken: String?
+    var sessionId  : String?
 
     func login() {
-        guard let url = URL(string: "http://localhost:8000/login") else { return }
+        state         = UUID().uuidString
+        guard let url = URL(string: "http://localhost:8000/login?state=\(state!)") else { return }
         UIApplication.shared.open(url)
     }
 
     func logout() {
-        isLoggedIn   = false
-        userName     = ""
-        accessToken  = nil
-        refreshToken = nil
+        isLoggedIn  = false
+        state       = nil
+        accessToken = nil
+        sessionId   = nil
     }
 
-    func handleRedirect(_ url: URL) {
+    func handleRedirect(_ url: URL) async {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
               let queryItems = components.queryItems else {
             return
         }
 
+        var responseCode : String? = nil
+        var responseState: String? = nil
+
         for item in queryItems {
-            if item.name == "access_token" {
-                accessToken = item.value
+            if item.name == "code" {
+                responseCode = item.value
             }
-            else if item.name == "refresh_token" {
-                refreshToken = item.value
+            else if item.name == "state" {
+                responseState = item.value
             }
         }
 
-        if accessToken != nil && refreshToken != nil {
-            isLoggedIn = true
-        }
-        else {
-            accessToken  = nil
-            refreshToken = nil
+        guard let rc = responseCode ,
+              let rs = responseState,
+              rs == state else { return }
+
+        guard let url      = URL(string: "http://localhost:8000/token") else { return }
+        var request        = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let requestBody    = ["code": rc]
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: requestBody) else { return }
+        request.httpBody   = jsonData
+
+        let data = try? await URLSession.shared.data(for: request).0
+        let json = data.flatMap { try? JSONSerialization.jsonObject(with: $0, options: []) as? [String: Any] }
+
+        guard let accessToken = json?[ "access_token" ] as? String,
+              let sessionId   = json?[ "session_id"   ] as? String else { return }
+
+        DispatchQueue.main.async {
+            self.isLoggedIn  = true
+            self.state       = nil
+            self.accessToken = accessToken
+            self.sessionId   = sessionId
         }
     }
 }

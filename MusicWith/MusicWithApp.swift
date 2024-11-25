@@ -15,7 +15,9 @@ struct MusicWithApp: App {
         WindowGroup {
             MainView()
                 .onOpenURL { url in
-                    authState.handleRedirect(url)
+                    Task {
+                        await authState.handleRedirect(url)
+                    }
                 }
         }
     }
