@@ -15,6 +15,18 @@ func getSpotifyJson(_ url: String) async -> [String: Any]? {
         return nil
     }
 
+    if let result = await fetchWithAuth(url) {
+        return result
+    }
+    else {
+        await authState.tokenRefresh()
+        return await fetchWithAuth(url)
+    }
+}
+
+private func fetchWithAuth(_ url: URL) async -> [String: Any]? {
+    let authState = SpotifyAuthState.shared
+
     var request = URLRequest(url: url)
     request.setValue("Bearer \(authState.accessToken!)", forHTTPHeaderField: "Authorization")
 
