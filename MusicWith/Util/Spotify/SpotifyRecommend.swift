@@ -16,7 +16,7 @@ class SpotifyRecommend {
     }
 
     func playList(idx: Int) async -> [SpotifyPlayList] {
-        guard let json      = await getSpotifyJson("https://api.spotify.com/v1/browse/featured-playlists?offset=\(_playListStorage.count)&limit=\(CHUNK_SIZE)"),
+        guard let json      = await SpotifyAPI.shared.getSpotifyAPIJson("https://api.spotify.com/v1/browse/featured-playlists?offset=\(_playListStorage.count)&limit=\(CHUNK_SIZE)"),
               let playlists = json     [ "playlists" ] as?  [String: Any],
               let items     = playlists[ "items"     ] as? [[String: Any]] else {
             return _playListStorage
