@@ -28,7 +28,7 @@ class SpotifyUser {
             return value
         }
 
-        guard let json   = await getSpotifyJson("https://api.spotify.com/v1/\(userId.map { "users/\($0)" } ?? "me")"),
+        guard let json   = await SpotifyAPI.shared.getSpotifyAPIJson("https://api.spotify.com/v1/\(userId.map { "users/\($0)" } ?? "me")"),
               let name   = json[ "display_name" ] as?   String,
               let images = json[ "images"       ] as? [[String: Any]] else {
             return nil
@@ -54,7 +54,7 @@ class SpotifyUser {
 
     func playList(idx: Int) async -> [SpotifyPlayList] {
         repeat {
-            guard let json  = await getSpotifyJson("https://api.spotify.com/v1/\(userId.map { "users/\($0)" } ?? "me")/playlists?offset=\(_playListStorage.count)&limit=\(CHUNK_SIZE)"),
+            guard let json  = await SpotifyAPI.shared.getSpotifyAPIJson("https://api.spotify.com/v1/\(userId.map { "users/\($0)" } ?? "me")/playlists?offset=\(_playListStorage.count)&limit=\(CHUNK_SIZE)"),
                   let items = json[ "items" ] as? [[String: Any]] else {
                 return []
             }

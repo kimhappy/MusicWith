@@ -11,11 +11,11 @@ struct MainView: View {
     @State private var selectedDetent = SheetHeight.mini.detent()
     @State private var selection      = 0
 
-    @StateObject private var controlState = ControlState    .shared
-    @StateObject private var authState    = SpotifyAuthState.shared
+    @StateObject private var controlState = ControlState.shared
+    @StateObject private var spotify      = SpotifyAPI  .shared
 
     var body: some View {
-        if authState.isLoggedIn {
+        if spotify.isLoggedIn {
             VStack(spacing: 0) {
                 NavigationStack {
                     CustomTabView(isTop: true, selection: $selection, tabCount: 3) {
@@ -44,7 +44,7 @@ struct MainView: View {
         }
         else {
             Button("Login with Spotify") {
-                authState.login()
+                spotify.login()
             }
             .buttonStyle(.borderedProminent)
         }

@@ -33,7 +33,7 @@ class SpotifyTrack {
 
         let url = "https://api.spotify.com/v1/tracks/\(trackId)"
 
-        guard let json     = await getSpotifyJson(url),
+        guard let json     = await SpotifyAPI.shared.getSpotifyAPIJson(url),
               let name     = json         [ "name"        ] as?   String       ,
               let artists  = json         [ "artists"     ] as? [[String: Any]],
               let album    = json         [ "album"       ] as?  [String: Any] ,

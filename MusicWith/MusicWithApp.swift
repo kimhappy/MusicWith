@@ -9,14 +9,14 @@ import SwiftUI
 
 @main
 struct MusicWithApp: App {
-    @StateObject private var authState = SpotifyAuthState.shared
+    @StateObject private var spotify = SpotifyAPI.shared
 
     var body: some Scene {
         WindowGroup {
             MainView()
                 .onOpenURL { url in
                     Task {
-                        await authState.handleRedirect(url)
+                        await spotify.handleRedirect(url)
                     }
                 }
         }
