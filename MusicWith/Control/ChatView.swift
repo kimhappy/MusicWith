@@ -13,14 +13,15 @@ import Combine
 }*/
 
 struct ChatView: View {
-    @StateObject var controlState = ControlState.shared
-    @ObservedObject var networkService = NetworkService.shared
-    @State private var messageText     : String = ""
-    @State private var isSelected      : Bool   = false
-    @State private var selectedParentId: Int?   = nil
-
-    @State var chats: [Chat] = []
-
+    @StateObject    var controlState                    = ControlState.shared
+    @ObservedObject var networkService                  = NetworkService.shared
+    @State private  var messageText     : String        = ""
+    @State private  var isSelected      : Bool          = false
+    @State private  var isLongSelected  : Bool          = false
+    @State private  var selectedParentId: Int?          = nil
+    @State private  var selectedDeleteId: Int?          = nil
+    @State          var chats           : [Chat]        = []
+    @State          var refresh         : Bool          = false
     
     var body: some View {
         VStack {
@@ -38,6 +39,20 @@ struct ChatView: View {
                                         isSelected       = true
                                         selectedParentId = chatting.id
                                     }
+                                    .onLongPressGesture(minimumDuration: 1.0) {
+                                        isLongSelected   = true
+                                        selectedDeleteId = chatting.id
+                                    }
+                                    .alert(isPresented: $isLongSelected) {
+                                        Alert(
+                                            title: Text("Alert"),
+                                            message: Text("Are you sure you want to delete?"),
+                                            primaryButton: .default(Text("Delete")) {
+                                                deleteMessage()
+                                            },
+                                            secondaryButton: .cancel()
+                                        )
+                                    }
                                 Spacer()
                                 chatting.timeSong.map { Text(String($0)) }
                                 //Text(String(chatting.timeSong))
@@ -50,13 +65,26 @@ struct ChatView: View {
                             if chat2.parentId == chatting.id {
                                 HStack {
                                     Text("ㄴ")
-
                                     Text(chat2.text ?? "deleted")
                                         .padding()
                                         .background(Color.blue)
                                         .foregroundColor(.white)
                                         .cornerRadius(10)
                                         .padding(.leading, 5)
+                                        .onLongPressGesture(minimumDuration: 1.0) {
+                                            isLongSelected   = true
+                                            selectedDeleteId = chat2.id
+                                        }
+                                        .alert(isPresented: $isLongSelected) {
+                                            Alert(
+                                                title: Text("Alert"),
+                                                message: Text("Are you sure you want to delete?"),
+                                                primaryButton: .default(Text("Delete")) {
+                                                    deleteMessage()
+                                                },
+                                                secondaryButton: .cancel()
+                                            )
+                                        }
                                 }
                             }
                         }
@@ -99,7 +127,7 @@ struct ChatView: View {
             .padding()
         }
         .task {
-            await networkService.connect(trackID: "100", userID: "testapp", chats: $chats)
+            await networkService.connect(trackId: "100", userId: "uu", chats: $chats)
             networkService.askHistory()
         }
         .onDisappear {
@@ -112,10 +140,24 @@ struct ChatView: View {
         if messageText.isEmpty {
             return
         }
-        networkService.sendChat(time: Int(controlState.playState!.now), content: messageText)
-        messageText       = ""
-        isSelected        = false
-        selectedParentId  = nil
+        
+        if(isSelected) {    // reply
+            networkService.sendChat(content: messageText, time: nil, reply_to: selectedParentId)
+            messageText = ""
+            isSelected = false
+            selectedParentId = nil
+        }
+        else {
+            networkService.sendChat(content: messageText, time: Int(controlState.playState!.now), reply_to: nil)
+            messageText = ""
+        }
+    }
+    
+    private func deleteMessage() {
+        //if()
+        networkService.askDelete(chatId: selectedDeleteId!)
+        isLongSelected   = false
+        selectedDeleteId = nil
     }
 }
 

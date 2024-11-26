@@ -9,34 +9,34 @@ import Foundation
 import SwiftUI
 
 class NetworkService: ObservableObject {
-    static let shared = NetworkService()
+    static  let shared                                  = NetworkService()
     private var webSocketTask: URLSessionWebSocketTask?
     
     struct ChatNotice: Decodable {
         let Chat: ChatInfo
         struct ChatInfo: Decodable {
-            let user_id: String
-            let chat_id: Int
-            let content: String?
-            let time: Int?
+            let user_id : String
+            let chat_id : Int
+            let content : String?
+            let time    : Int?
             let reply_to: Int?
         }
     }
     struct DeleteNotice: Decodable {
-        let Delete: DeleteChatID
-        struct DeleteChatID: Decodable {
+        let Delete: DeleteChatId
+        struct DeleteChatId: Decodable {
             let chat_id: Int
         }
     }
     struct JoinUser: Decodable {
-        let Join: JoinUserID
-        struct JoinUserID: Decodable {
+        let Join: JoinUserId
+        struct JoinUserId: Decodable {
             let user_id: String
         }
     }
     struct LeaveUser: Decodable {
-        let Leave: LeaveUserID
-        struct LeaveUserID: Decodable {
+        let Leave: LeaveUserId
+        struct LeaveUserId: Decodable {
             let user_id: String
         }
     }
@@ -62,14 +62,15 @@ class NetworkService: ObservableObject {
     
     struct AskChat: Encodable {
         let Chat: ChatInfo
-        struct ChatInfo: Encodable {
-            let time: Int
-            let content: String
+        struct ChatInfo : Encodable {
+            let content : String
+            let time    : Int?
+            let reply_to: Int?
         }
     }
     struct AskDelete: Encodable {
-        let Delete: DeleteChatID
-        struct DeleteChatID: Encodable {
+        let Delete: DeleteChatId
+        struct DeleteChatId: Encodable {
             let chat_id: Int
         }
     }
@@ -82,8 +83,8 @@ class NetworkService: ObservableObject {
         struct Temp: Encodable { }
     }
     
-    func connect(trackID: String, userID: String, chats: Binding<[Chat]>) async {
-        guard let url = URL(string: "ws://127.0.0.1:8000/chat/\(trackID)/\(userID)") else {return}
+    func connect(trackId: String, userId: String, chats: Binding<[Chat]>) async {
+        guard let url = URL(string: "ws://127.0.0.1:8000/chat/\(trackId)/\(userId)") else {return}
         let request = URLRequest(url: url)
         webSocketTask = URLSession.shared.webSocketTask(with: request)
         webSocketTask?.resume()
@@ -152,9 +153,8 @@ class NetworkService: ObservableObject {
         }
     }
     
-    
-    func sendChat(time: Int, content: String) {
-        let msg = AskChat(Chat: AskChat.ChatInfo(time: time, content: content))
+    func sendChat(content: String, time: Int?, reply_to: Int?) {
+        let msg = AskChat(Chat: AskChat.ChatInfo(content: content, time: time, reply_to: reply_to))
         guard let json = try? JSONEncoder().encode(msg) else {
             return
         }
@@ -165,8 +165,17 @@ class NetworkService: ObservableObject {
             }
         })
     }
-    func askDelete() {
-            
+    func askDelete(chatId: Int) {
+        let msg = AskDelete(Delete: AskDelete.DeleteChatId(chat_id: chatId))
+        guard let json = try? JSONEncoder().encode(msg) else {
+            return
+        }
+        let message = String(data: json, encoding: .utf8)!
+        webSocketTask?.send(.string(message), completionHandler: {error in
+            if let error = error {
+                print(error.localizedDescription)
+            }
+        })
     }
     func askHistory() {
         let msg = AskHistory(History: AskHistory.Temp())
