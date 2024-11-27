@@ -9,11 +9,13 @@ import SwiftUI
 
 struct PlayListView: View {
     let playlist: SpotifyPlayList
-    @State var songList : [SpotifyTrack]    = []
-    @State var showNumber                   = 0;
-    @StateObject var controlState           = ControlState.shared
-    @State var playListName                 = ""
-    @State private var isLoading            = false
+
+    @State               var songList    : [SpotifyTrack] = []
+    @State               var showNumber                   = 0;
+    @StateObject         var controlState                 = ControlState.shared
+    @State               var playListName                 = ""
+    @State       private var isLoading                    = false
+
     var body: some View {
         ScrollView {
             LazyVStack {
@@ -55,8 +57,9 @@ struct PlayListView: View {
         .padding(.horizontal)
         .navigationTitle(playListName)
         .task {
-            songList = await playlist.track(idx: showNumber)
+            songList     = await playlist.track(idx: showNumber)
             playListName = await playlist.name() ?? "None"
+
             for song in songList {
                 await song.name()
                 await song.imageUrl()

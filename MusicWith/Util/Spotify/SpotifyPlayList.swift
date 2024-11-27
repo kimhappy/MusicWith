@@ -14,9 +14,9 @@ class SpotifyPlayList {
     private var _trackStorage: [SpotifyTrack] = []
 
     let playListId: String
-    let imageURL : String?
-    let title : String?
-    
+    let imageURL  : String?
+    let title     : String?
+
     init(playListId: String, name: String? = nil, imageUrls: [String]? = nil) {
         self.playListId              = playListId
         self._storage[ "name"      ] = name
@@ -32,7 +32,7 @@ class SpotifyPlayList {
 
         let url = "https://api.spotify.com/v1/playlists/\(playListId)"
 
-        guard let json   = await getSpotifyJson(url),
+        guard let json   = await SpotifyAPI.shared.getSpotifyAPIJson(url),
               let images = json[ "images" ] as? [[String: Any]],
               let name   = json[ "name"   ] else {
             return nil
@@ -68,7 +68,7 @@ class SpotifyPlayList {
         repeat {
             let url = "https://api.spotify.com/v1/playlists/\(playListId)/tracks?offset=\(_trackStorage.count)&limit=\(CHUNK_SIZE)"
 
-            guard let json  = await getSpotifyJson(url)      ,
+            guard let json  = await SpotifyAPI.shared.getSpotifyAPIJson(url),
                   let items = json[ "items" ] as? [[String: Any]],
                   !items.isEmpty else {
                 return _trackStorage
@@ -94,6 +94,7 @@ class SpotifyPlayList {
 
         return _trackStorage
     }
+
     // 현재 playlist 내부 음악이 몇 개인지 알 필요가 있음
     func total() -> Int {
         return _trackStorage.count

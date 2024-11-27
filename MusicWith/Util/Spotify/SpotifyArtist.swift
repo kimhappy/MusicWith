@@ -22,7 +22,7 @@ class SpotifyArtist {
 
         let url = "https://api.spotify.com/v1/artists/\(artistId)"
 
-        guard let json = await getSpotifyJson(url),
+        guard let json = await SpotifyAPI.shared.getSpotifyAPIJson(url),
               let name = json[ "name" ] as? String else {
             return nil
         }

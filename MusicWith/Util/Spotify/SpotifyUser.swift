@@ -28,7 +28,7 @@ class SpotifyUser {
             return value
         }
 
-        guard let json   = await getSpotifyJson("https://api.spotify.com/v1/\(userId.map { "users/\($0)" } ?? "me")"),
+        guard let json   = await SpotifyAPI.shared.getSpotifyAPIJson("https://api.spotify.com/v1/\(userId.map { "users/\($0)" } ?? "me")"),
               let name   = json[ "display_name" ] as?   String,
               let images = json[ "images"       ] as? [[String: Any]] else {
             return nil
@@ -54,7 +54,7 @@ class SpotifyUser {
 
     func playList(idx: Int) async -> [SpotifyPlayList] {
         repeat {
-            guard let json  = await getSpotifyJson("https://api.spotify.com/v1/\(userId.map { "users/\($0)" } ?? "me")/playlists?offset=\(_playListStorage.count)&limit=\(CHUNK_SIZE)"),
+            guard let json  = await SpotifyAPI.shared.getSpotifyAPIJson("https://api.spotify.com/v1/\(userId.map { "users/\($0)" } ?? "me")/playlists?offset=\(_playListStorage.count)&limit=\(CHUNK_SIZE)"),
                   let items = json[ "items" ] as? [[String: Any]] else {
                 return []
             }
@@ -65,18 +65,20 @@ class SpotifyUser {
                       let name       = item[ "name"   ] as?   String  else {
                     return []
                 }
-                // 알고리즘 상 수정 필요? 현재는 중복 플레이리스트 막는 용도 -> 추후에 ID List Set을 만들어서 더 효율적으로 적용 가능할 듯
-                if(_playListStorage.contains(where: {$0.playListId == playListId})) {
+
+                // TODO: 알고리즘 상 수정 필요? 현재는 중복 플레이리스트 막는 용도 -> 추후에 ID List Set을 만들어서 더 효율적으로 적용 가능할 듯
+                if (_playListStorage.contains(where: { $0.playListId == playListId })) {
                     break;
                 }
-                
+
                 var imageUrls: [String] = []
                 if let images = item[ "images" ] as? [[String : Any]] {
                     for image in images {
                         let url = image[ "url" ] as? String
                         imageUrls.append(url ?? "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228")
                     }
-                } else {
+                }
+                else {
                     imageUrls.append("https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228")
                 }
 

@@ -7,10 +7,9 @@
 
 // https://developer.spotify.com/documentation/web-api/reference/search
 class SpotifySearch {
-    let query: String
-
     private let CHUNK_SIZE: Int = 15 // 최소 한 스크롤은 넘기게 설정
 
+    let query: String
     private var _trackStorage: [SpotifyTrack] = []
 
     private static func queryEncode(_ str: String) -> String? {
@@ -22,12 +21,12 @@ class SpotifySearch {
     init(query: String) {
         self.query = query
     }
-    // 배열 전체를 반환하도록 변경
+
     func track(idx: Int) async -> [SpotifyTrack] {
         repeat {
             let url = "https://api.spotify.com/v1/search?q=\(query)&type=track&offset=\(_trackStorage.count)&limit=\(CHUNK_SIZE)"
 
-            guard let json   = await getSpotifyJson(url),
+            guard let json   = await SpotifyAPI.shared.getSpotifyAPIJson(url),
                   let tracks = json  [ "tracks" ] as?  [String: Any],
                   let items  = tracks[ "items"  ] as? [[String: Any]] else {
                 return []

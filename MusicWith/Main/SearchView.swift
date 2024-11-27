@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct SearchView: View {
-    @State var spotifySearch : SpotifySearch?
-    @State var searchedSongList : [SpotifyTrack]    = []
-    @State private var isSearched : Bool            = false // isSearched
-    @State private var searchText : String          = "" // 검색할 String
-    @State private var searchNum : Int              = 0; // Search Index 용도, 변화 X
-    @StateObject private var recentSearch           = RecentSearch()
-    @StateObject var controlState                   = ControlState.shared
+    @State               var spotifySearch   : SpotifySearch?
+    @State               var searchedSongList: [SpotifyTrack] = []
+    @State       private var isSearched      : Bool           = false // isSearched
+    @State       private var searchText      : String         = ""    // 검색할 String
+    @State       private var searchNum       : Int            = 0     // Search Index 용도, 변화 X
+    @StateObject private var recentSearch                     = RecentSearch()
+    @StateObject         var controlState                     = ControlState.shared
 
     var body: some View {
         VStack {
@@ -89,11 +89,12 @@ struct SearchView: View {
                                 Task {
                                     // 무한 스크롤 구현 용도, 마지막 것이 출력되면 data 추가 요청
                                     let lastIndex = searchedSongList.count - 1
+
                                     if song.trackId == searchedSongList[lastIndex].trackId {
                                         searchedSongList = await spotifySearch?.track(idx: searchNum) ?? []
                                     }
                                 }
-                            }                            
+                            }
                         }
                     }
                 }
@@ -134,16 +135,16 @@ struct SearchView: View {
     }
 
     private func deleteSearch() {
-        searchText = ""
-        isSearched = false
-        spotifySearch = nil
+        searchText       = ""
+        isSearched       = false
+        spotifySearch    = nil
         searchedSongList = []
     }
 
     private func sendSearch() async {
         // TODO: Implement Search and get Playlists
-        spotifySearch = SpotifySearch(query: searchText)
-        searchedSongList = []
+        spotifySearch           = SpotifySearch(query: searchText)
+        searchedSongList        = []
         guard let searchSuccess = spotifySearch else {return }
 
         searchedSongList = await searchSuccess.track(idx: searchNum)
