@@ -13,6 +13,7 @@ struct SearchView: View {
     @State       private var isSearched      : Bool           = false // isSearched
     @State       private var searchText      : String         = ""    // 검색할 String
     @State       private var searchNum       : Int            = 0     // Search Index 용도, 변화 X
+    @State               var recentSearchList                 = RecentSearch().myRecentSearches()
     @StateObject private var recentSearch                     = RecentSearch()
     @StateObject         var controlState                     = ControlState.shared
 
@@ -104,7 +105,7 @@ struct SearchView: View {
             else {
                 ScrollView {
                     LazyVStack(alignment: .leading) {
-                        ForEach(recentSearch.myRecentSearch(), id: \.self) { term in
+                        ForEach(recentSearchList, id: \.self) { term in
                             HStack {
                                 Text(term)
                                     .padding(.vertical, 8)
@@ -149,6 +150,7 @@ struct SearchView: View {
 
         searchedSongList = await searchSuccess.track(idx: searchNum)
         recentSearch.addRecentSearch(searchText)
+        recentSearchList = recentSearch.myRecentSearches()
         isSearched = true
     }
 
@@ -159,6 +161,7 @@ struct SearchView: View {
 
     private func deleteRecent(_ term : String) {
         recentSearch.deleteRecentSearch(term)
+        recentSearchList = recentSearch.myRecentSearches()
     }
 }
 
