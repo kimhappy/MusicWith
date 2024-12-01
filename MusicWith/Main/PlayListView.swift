@@ -31,7 +31,7 @@ struct PlayListView: View {
                             ProgressView()
                                 .frame(width: 50, height: 50)
                         }
-                        Text(song.title ?? "")
+                        CustomScrollText(text: song.title ?? "")
                             .padding(.leading, 20)
                         Spacer()
                     }
