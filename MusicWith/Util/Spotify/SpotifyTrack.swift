@@ -43,8 +43,6 @@ class SpotifyTrack {
             return nil
         }
         
-        
-
         var artistNames: [String] = []
 
         for artist in artists {
