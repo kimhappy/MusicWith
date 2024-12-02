@@ -8,26 +8,22 @@
 import SwiftUI
 import Combine
 
-/*class MyChat: ObservableObject {
-    @Published var chattings: [Chat] = []
-}*/
-
 struct ChatView: View {
     @StateObject    var controlState                    = ControlState.shared
     @ObservedObject var networkService                  = NetworkService.shared
     @State private  var messageText     : String        = ""
     @State private  var isSelected      : Bool          = false
     @State private  var isLongSelected  : Bool          = false
-    @State private  var selectedParentId: Int?          = nil
-    @State private  var selectedDeleteId: Int?          = nil
+    @State private  var selectedParentId: String?       = nil
+    @State private  var selectedDeleteId: String?       = nil
     @State          var chats           : [Chat]        = []
-    @State          var refresh         : Bool          = false
+    @State          var trackId         : String        = ""
     
     var body: some View {
         VStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
-                    ForEach(chats, id:\.id) { chatting in
+                    ForEach(chats) { chatting in
                         HStack {
                             if chatting.parentId == nil {
                                 Text(chatting.text ?? "deleted")
@@ -46,8 +42,8 @@ struct ChatView: View {
                                     .alert(isPresented: $isLongSelected) {
                                         Alert(
                                             title: Text("Alert"),
-                                            message: Text("Are you sure you want to delete?"),
-                                            primaryButton: .default(Text("Delete")) {
+                                            message        : Text("Are you sure you want to delete?"),
+                                            primaryButton  : .default(Text("Delete")) {
                                                 deleteMessage()
                                             },
                                             secondaryButton: .cancel()
@@ -55,9 +51,7 @@ struct ChatView: View {
                                     }
                                 Spacer()
                                 chatting.timeSong.map { Text(String($0)) }
-                                //Text(String(chatting.timeSong))
                                     .font(.system(size:15))
-
                             }
                         }
 
@@ -77,9 +71,9 @@ struct ChatView: View {
                                         }
                                         .alert(isPresented: $isLongSelected) {
                                             Alert(
-                                                title: Text("Alert"),
-                                                message: Text("Are you sure you want to delete?"),
-                                                primaryButton: .default(Text("Delete")) {
+                                                title          : Text("Alert"),
+                                                message        : Text("Are you sure you want to delete?"),
+                                                primaryButton  : .default(Text("Delete")) {
                                                     deleteMessage()
                                                 },
                                                 secondaryButton: .cancel()
@@ -127,9 +121,14 @@ struct ChatView: View {
             .padding()
         }
         .task {
-            await networkService.connect(trackId: "100", userId: "uu", chats: $chats)
+            if let state = controlState.playState {
+                trackId  = state.song.trackId
+            }
+            //let _      = print(trackId)
+            await networkService.connect(trackId: "10", userId: "uu", chats: $chats)
             networkService.askHistory()
         }
+        
         .onDisappear {
             networkService.disconnect()
             chats = []
@@ -143,8 +142,8 @@ struct ChatView: View {
         
         if(isSelected) {    // reply
             networkService.sendChat(content: messageText, time: nil, reply_to: selectedParentId)
-            messageText = ""
-            isSelected = false
+            messageText      = ""
+            isSelected       = false
             selectedParentId = nil
         }
         else {
@@ -162,5 +161,5 @@ struct ChatView: View {
 }
 
 #Preview {
-    MainView()
+    ChatView()
 }

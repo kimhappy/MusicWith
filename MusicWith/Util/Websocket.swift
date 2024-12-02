@@ -16,16 +16,16 @@ class NetworkService: ObservableObject {
         let Chat: ChatInfo
         struct ChatInfo: Decodable {
             let user_id : String
-            let chat_id : Int
+            let chat_id : String
             let content : String?
             let time    : Int?
-            let reply_to: Int?
+            let reply_to: String?
         }
     }
     struct DeleteNotice: Decodable {
         let Delete: DeleteChatId
         struct DeleteChatId: Decodable {
-            let chat_id: Int
+            let chat_id: String
         }
     }
     struct JoinUser: Decodable {
@@ -47,10 +47,10 @@ class NetworkService: ObservableObject {
         }
         struct Items: Decodable {
             let user_id: String
-            let chat_id: Int
+            let chat_id: String
             let content: String?
             let time: Int?
-            let reply_to: Int?
+            let reply_to: String?
         }
     }
     struct OnlineUserResponse: Decodable {
@@ -65,13 +65,13 @@ class NetworkService: ObservableObject {
         struct ChatInfo : Encodable {
             let content : String
             let time    : Int?
-            let reply_to: Int?
+            let reply_to: String?
         }
     }
     struct AskDelete: Encodable {
         let Delete: DeleteChatId
         struct DeleteChatId: Encodable {
-            let chat_id: Int
+            let chat_id: String
         }
     }
     struct AskHistory: Encodable {
@@ -130,7 +130,10 @@ class NetworkService: ObservableObject {
         }
         if(message.contains("Delete")) {
             guard let info = try? JSONDecoder().decode(DeleteNotice.self, from: json) else {return}
-            print("Delete response received")
+            //print("Delete response received")
+            chats.wrappedValue = []
+            self.askHistory()
+            
         }
         if(message.contains("Join")) {
             guard let info = try? JSONDecoder().decode(JoinUser.self, from: json) else {return}
@@ -153,7 +156,7 @@ class NetworkService: ObservableObject {
         }
     }
     
-    func sendChat(content: String, time: Int?, reply_to: Int?) {
+    func sendChat(content: String, time: Int?, reply_to: String?) {
         let msg = AskChat(Chat: AskChat.ChatInfo(content: content, time: time, reply_to: reply_to))
         guard let json = try? JSONEncoder().encode(msg) else {
             return
@@ -165,7 +168,7 @@ class NetworkService: ObservableObject {
             }
         })
     }
-    func askDelete(chatId: Int) {
+    func askDelete(chatId: String) {
         let msg = AskDelete(Delete: AskDelete.DeleteChatId(chat_id: chatId))
         guard let json = try? JSONEncoder().encode(msg) else {
             return
