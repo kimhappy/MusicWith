@@ -25,9 +25,11 @@ struct ControlCoreView: View {
                         .frame(width: 50, height: 50)
                 }
                 VStack(alignment: .leading) {
-                    Text(songName)
+                    CustomScrollText(text: songName)
+                        .frame(width : 100)
                         .font(.headline)
-                    Text(songArtist)
+                    CustomScrollText(text: songArtist)
+                        .frame(width : 100)
                         .font(.subheadline)
                 }
                 VStack(alignment: .center) {
@@ -52,7 +54,7 @@ struct ControlCoreView: View {
                         }
                         .padding(.horizontal, 5)
                     }
-                    .padding(.top, 30)
+                    .padding(.top, 50)
 
                     Slider(value: Binding(get: { state.now }, set: { newNow in
                         state.now = newNow
@@ -70,7 +72,7 @@ struct ControlCoreView: View {
                             controlState.seek(state.now)
                         }
                     })
-                    .padding()
+                    .padding(.bottom, 30)
                 }
             }
             .task {

@@ -76,7 +76,7 @@ struct SearchView: View {
                                     ProgressView()
                                         .frame(width: 50, height: 50)
                                 }
-                                Text(song.title ?? "None")
+                                CustomScrollText(text: song.title ?? "None")
                                     .padding(.leading, 20)
                                 Spacer()
                             }
