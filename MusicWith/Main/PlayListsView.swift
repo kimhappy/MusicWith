@@ -12,7 +12,8 @@ struct PlayListsView: View {
     @State var playLists : [SpotifyPlayList]    = []
     @State var showNumber                       = -1
     @State var me        : SpotifyUser? // State로 두어야 무한 스크롤의 결과가 바로 표시됨
-
+    @State var isDarkmode                       = UITraitCollection.current.userInterfaceStyle == .dark
+    
     var body: some View {
         VStack {
             Text("\(userName)의 플레이리스트")
@@ -34,7 +35,7 @@ struct PlayListsView: View {
                                         .frame(width: 50, height: 50)
                                 }
                                 CustomScrollText(text: playlist.title ?? "Error")
-                                    .foregroundColor(.black)
+                                    .foregroundColor(isDarkmode ? .white : .black)
                                     .padding(.leading, 20)
                                 Spacer()
                             }
