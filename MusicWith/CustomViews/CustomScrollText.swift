@@ -4,11 +4,11 @@ import Foundation
 
 public struct CustomScrollText : View {
     public var text: String
-    var font: UIFont = UIFont.preferredFont(forTextStyle: .body)
-    var leftFade: CGFloat = 3.0
-    var rightFade: CGFloat = 3.0
-    var startDelay: Double = 0.0
-    var alignment: Alignment = .leading
+    var font: UIFont            = UIFont.preferredFont(forTextStyle: .body)
+    var leftFade: CGFloat       = 3.0
+    var rightFade: CGFloat      = 3.0
+    var startDelay: Double      = 0.0
+    var alignment: Alignment    = .leading
     
     @State private var animate = false
     var isCompact = false
@@ -103,6 +103,11 @@ public struct CustomScrollText : View {
     
     public init(text: String) {
         self.text = text
+    }
+    
+    public init(text : String, font : UIFont) {
+        self.text = text
+        self.font = font
     }
 }
 

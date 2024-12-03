@@ -25,10 +25,10 @@ struct ControlCoreView: View {
                         .frame(width: 50, height: 50)
                 }
                 VStack(alignment: .leading) {
-                    CustomScrollText(text: songName)
+                    CustomScrollText(text: songName, font: UIFont.preferredFont(forTextStyle: .headline))
                         .frame(width : 100)
                         .font(.headline)
-                    CustomScrollText(text: songArtist)
+                    CustomScrollText(text: songArtist, font: UIFont.preferredFont(forTextStyle: .headline))
                         .frame(width : 100)
                         .font(.subheadline)
                 }
