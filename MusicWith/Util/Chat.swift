@@ -8,10 +8,10 @@
 import SwiftUI
 import Combine
 
-struct Chat: Identifiable {
-    let id      : Int
+struct Chat: Identifiable, Equatable {
+    let id      : String
     let user    : String // sending user
-    let text    : String // text
-    let timeSong: Double // chatted playtime of the song
-    let parentId: Int?
+    var text    : String? // text
+    var timeSong: Int? // chatted playtime of the song
+    var parentId: String?
 }

@@ -9,24 +9,24 @@ import SwiftUI
 import Combine
 
 struct ChatView: View {
-    @StateObject var controlState = ControlState.shared
-
-    @State private var messageText     : String = ""
-    @State private var isSelected      : Bool   = false
-    @State private var selectedParentId: Int?   = nil
-    @State private var globalTestId    : Int    = 2
-
-    //서버에서 해당 곡에 대한 채팅 목록을 불러오도록 구현해야 함
-    @State private var chats: [Chat] = [Chat(id: 1, user: "dummyuser", text: "hi", timeSong: 2, parentId: nil)]
-
+    @StateObject    var controlState                    = ControlState.shared
+    @ObservedObject var networkService                  = NetworkService.shared
+    @State private  var messageText     : String        = ""
+    @State private  var isSelected      : Bool          = false
+    @State private  var isLongSelected  : Bool          = false
+    @State private  var selectedParentId: String?       = nil
+    @State private  var selectedDeleteId: String?       = nil
+    @State          var chats           : [Chat]        = []
+    @State          var trackId         : String        = ""
+    
     var body: some View {
         VStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
-                    ForEach(chats, id:\.id) { chatting in
+                    ForEach(chats) { chatting in
                         HStack {
                             if chatting.parentId == nil {
-                                Text(chatting.text)
+                                Text(chatting.text ?? "deleted")
                                     .padding()
                                     .background(Color.green)
                                     .foregroundColor(.white)
@@ -35,10 +35,23 @@ struct ChatView: View {
                                         isSelected       = true
                                         selectedParentId = chatting.id
                                     }
+                                    .onLongPressGesture(minimumDuration: 1.0) {
+                                        isLongSelected   = true
+                                        selectedDeleteId = chatting.id
+                                    }
+                                    .alert(isPresented: $isLongSelected) {
+                                        Alert(
+                                            title: Text("Alert"),
+                                            message        : Text("Are you sure you want to delete?"),
+                                            primaryButton  : .default(Text("Delete")) {
+                                                deleteMessage()
+                                            },
+                                            secondaryButton: .cancel()
+                                        )
+                                    }
                                 Spacer()
-                                Text(String(chatting.timeSong))
+                                chatting.timeSong.map { Text(String($0)) }
                                     .font(.system(size:15))
-
                             }
                         }
 
@@ -46,13 +59,26 @@ struct ChatView: View {
                             if chat2.parentId == chatting.id {
                                 HStack {
                                     Text("ㄴ")
-
-                                    Text(chat2.text)
+                                    Text(chat2.text ?? "deleted")
                                         .padding()
                                         .background(Color.blue)
                                         .foregroundColor(.white)
                                         .cornerRadius(10)
                                         .padding(.leading, 5)
+                                        .onLongPressGesture(minimumDuration: 1.0) {
+                                            isLongSelected   = true
+                                            selectedDeleteId = chat2.id
+                                        }
+                                        .alert(isPresented: $isLongSelected) {
+                                            Alert(
+                                                title          : Text("Alert"),
+                                                message        : Text("Are you sure you want to delete?"),
+                                                primaryButton  : .default(Text("Delete")) {
+                                                    deleteMessage()
+                                                },
+                                                secondaryButton: .cancel()
+                                            )
+                                        }
                                 }
                             }
                         }
@@ -94,22 +120,46 @@ struct ChatView: View {
             }
             .padding()
         }
+        .task {
+            if let state = controlState.playState {
+                trackId  = state.song.trackId
+            }
+            //let _      = print(trackId)
+            await networkService.connect(trackId: "10", userId: "uu", chats: $chats)
+            networkService.askHistory()
+        }
+        
+        .onDisappear {
+            networkService.disconnect()
+            chats = []
+        }
     }
-
+    
     private func sendMessage() {
         if messageText.isEmpty {
             return
         }
-
-        chats.append(Chat(id: globalTestId, user: "user", text: messageText, timeSong: controlState.playState!.now, parentId: selectedParentId))
-
-        messageText       = ""
-        isSelected        = false
-        selectedParentId  = nil
-        globalTestId     += 1
+        
+        if(isSelected) {    // reply
+            networkService.sendChat(content: messageText, time: nil, reply_to: selectedParentId)
+            messageText      = ""
+            isSelected       = false
+            selectedParentId = nil
+        }
+        else {
+            networkService.sendChat(content: messageText, time: Int(controlState.playState!.now), reply_to: nil)
+            messageText = ""
+        }
+    }
+    
+    private func deleteMessage() {
+        //if()
+        networkService.askDelete(chatId: selectedDeleteId!)
+        isLongSelected   = false
+        selectedDeleteId = nil
     }
 }
 
 #Preview {
-    MainView()
+    ChatView()
 }

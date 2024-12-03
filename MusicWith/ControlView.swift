@@ -10,7 +10,7 @@ import SwiftUI
 struct ControlView: View {
     @State       var selection = 0
     @StateObject var controlState = ControlState.shared
-
+    
     var body: some View {
         if controlState.sheetHeight == .mini {
             VStack(spacing: 0) {
