@@ -33,7 +33,7 @@ struct PlayListsView: View {
                                     ProgressView()
                                         .frame(width: 50, height: 50)
                                 }
-                                Text(playlist.title ?? "Error")
+                                CustomScrollText(text: playlist.title ?? "Error")
                                     .foregroundColor(.black)
                                     .padding(.leading, 20)
                                 Spacer()
