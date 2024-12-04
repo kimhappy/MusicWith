@@ -81,15 +81,16 @@ struct ChatView: View {
                                         )
                                      }
                                 }
-                                .padding(.vertical, 10)
+                                .padding(.vertical, 20)
                             }
                         }
-                        .overlay(
+                        //.padding(.vertical, 10)
+                        /*.overlay(
                             Rectangle()
                                 .frame(height:1)
                                 .foregroundColor(.gray),
                             alignment: .bottom
-                        )
+                        )*/
                                 
                         ForEach(chats) { chat2 in
                             if chat2.parentId == chat.id {
@@ -136,17 +137,19 @@ struct ChatView: View {
                                             )
                                          }
                                     }
-                                    .padding(.bottom, 10)
+                                    .padding(.bottom, 20)
                                 }
-                                .overlay(
+                                /*.overlay(
                                     Rectangle()
                                         .frame(height:1)
                                         .foregroundColor(.gray),
                                     alignment: .bottom
-                                )
+                                )*/
                             }
                         }
+                        //.padding(.vertical, 10)
                     }
+                    
                     .padding(.bottom, 0.1)
                 }
             }
