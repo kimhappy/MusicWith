@@ -39,7 +39,7 @@ class SpotifyTrack {
               let album    = json         [ "album"       ] as?  [String: Any] ,
               let images   = album        [ "images"      ] as? [[String: Any]],
               let imageUrl = images.first?[ "url"         ] as?   String       ,
-              let songUrl  = json         [ "preview_url" ] as?   String else { // 현재 preview_url 만 가능 확인, href, external_urls [spotify] 시도해 봄 -> 안 됨
+              let songUrl  = json         [ "uri" ] as?   String else { // 현재 preview_url 만 가능 확인, href, external_urls [spotify] 시도해 봄 -> 안 됨
             return nil
         }
         
