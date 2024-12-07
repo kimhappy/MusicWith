@@ -31,7 +31,7 @@ class ControlState: ObservableObject {
     @Published var musicIndex : Int?                = nil   // playlist 존재시 현재 음악의 index
 
     func setSong(song : SpotifyTrack) async -> Bool {
-        guard let url = await URL(string: song.songUrl() ?? "") else { return false }
+        guard let url = await URL(string: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3") else { return false }
         showSheet     = true
         stopPlayback()
         startPlayback(song: song, url: url)
@@ -140,10 +140,9 @@ class ControlState: ObservableObject {
 
         // list 있는데 music index 없는 경우
         // list 에 song이 0개인 경우
-        guard let musicIndex, playlist.total() == 0 else { return } // error
-
+        guard let musicIndex, playlist.total() != 0 else { return } // error
         let newIndex = (musicIndex + 1) % playlist.total()
-        let newSong  = await playlist.track(idx: playlist.total())[ newIndex ]
+        let newSong  = await playlist.track(idx: -1)[ newIndex ]
 
         await setSong(song: newSong)
         setPlaylist(playlist, newSong)
@@ -163,10 +162,10 @@ class ControlState: ObservableObject {
 
         // list 있는데 music index 없는 경우
         // list 에 song이 0개인 경우
-        guard let musicIndex, playlist.total() == 0 else { return } // error
+        guard let musicIndex, playlist.total() != 0 else { return } // error
 
         let newIndex = (musicIndex - 1 + playlist.total()) % playlist.total()
-        let newSong  = await playlist.track(idx: playlist.total())[newIndex]
+        let newSong  = await playlist.track(idx: -1)[newIndex]
 
         await setSong(song: newSong)
         setPlaylist(playlist, newSong)
