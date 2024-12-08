@@ -16,7 +16,7 @@ class PlayState {
     init(song: SpotifyTrack) {
         self.song      = song
         self.isPlaying = false
-        self.duration  = 123
-        self.now       = 23
+        self.duration  = 0
+        self.now       = 0
     }
 }
