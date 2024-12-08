@@ -30,7 +30,3 @@ struct LyricsView: View {
         }
     }
 }
-
-#Preview {
-    MainView()
-}

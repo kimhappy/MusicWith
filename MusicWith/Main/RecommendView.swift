@@ -58,7 +58,3 @@ struct RecommendView: View {
         }
     }
 }
-
-#Preview {
-    MainView()
-}

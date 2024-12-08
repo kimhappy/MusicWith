@@ -67,7 +67,3 @@ struct PlayListView: View {
         }
     }
 }
-
-#Preview {
-    MainView()
-}

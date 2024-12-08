@@ -56,7 +56,3 @@ struct CustomTabView< Content: View >: View {
         }
     }
 }
-
-#Preview {
-    MainView()
-}

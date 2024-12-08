@@ -14,7 +14,7 @@ struct PlayListsView: View {
     @State var me        : SpotifyUser? // State로 두어야 무한 스크롤의 결과가 바로 표시됨
     @Environment(\.colorScheme) var colorSchema
     @StateObject private var spotify      = SpotifyAPI  .shared
-    
+
     var body: some View {
         ZStack {
             VStack {
@@ -59,7 +59,7 @@ struct PlayListsView: View {
             }
             .task {
                 self.me = SpotifyUser(userId: nil)
-                
+
                 if let me = me {
                     userName  = await me.name() ?? "나"
                     playLists = await me.playList(idx: showNumber)
@@ -76,8 +76,4 @@ struct PlayListsView: View {
             .offset(x : 165, y : -320)
         }
     }
-}
-
-#Preview {
-    MainView()
 }

@@ -67,7 +67,7 @@ struct ControlCoreView: View {
                             controlState.seek(newNow)
                         }
                     }),
-                           
+
                     in: 0...state.duration,
                     onEditingChanged: { isEditing in
                         controlState.isDragging = isEditing
@@ -98,15 +98,11 @@ struct ControlCoreView: View {
             EmptyView()
         }
     }
-    
+
     func formatTime(_ time : Double) -> String {
         let minutes = Int(time) / 60
         let seconds = Int(time) % 60
-        
+
         return String(format : "%02d:%02d", minutes, seconds)
     }
-}
-
-#Preview {
-    MainView()
 }

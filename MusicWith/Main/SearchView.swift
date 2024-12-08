@@ -164,7 +164,3 @@ struct SearchView: View {
         recentSearchList = recentSearch.myRecentSearches()
     }
 }
-
-#Preview {
-    MainView()
-}

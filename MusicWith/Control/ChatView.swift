@@ -20,7 +20,7 @@ struct ChatView: View {
     @State          var chats           : [Chat]        = []
     @State          var trackId         : String        = ""
     let testUserId: String = "testuser"
-    
+
     var body: some View {
         VStack {
             ScrollView {
@@ -91,7 +91,7 @@ struct ChatView: View {
                                 .foregroundColor(.gray),
                             alignment: .bottom
                         )*/
-                                
+
                         ForEach(chats) { chat2 in
                             if chat2.parentId == chat.id {
                                 HStack {
@@ -149,11 +149,11 @@ struct ChatView: View {
                         }
                         //.padding(.vertical, 10)
                     }
-                    
+
                     .padding(.bottom, 0.1)
                 }
             }
-            
+
             VStack(alignment: .leading, spacing: 10) {
                 if isSelected {
                     HStack {
@@ -227,12 +227,12 @@ struct ChatView: View {
             chats = []
         }
     }
-    
+
     private func sendMessage() {
         if messageText.isEmpty {
             return
         }
-        
+
         if(isSelected) {    // reply
             networkService.sendChat(content: messageText, time: nil, reply_to: selectedParentId)
             messageText      = ""
@@ -244,21 +244,17 @@ struct ChatView: View {
             messageText = ""
         }
     }
-    
+
     private func deleteMessage() {
         //if()
         networkService.askDelete(chatId: selectedDeleteId!)
         isLongSelected   = false
         selectedDeleteId = nil
     }
-    
+
     func timeFormat(seconds: Int) -> String {
         let minute = seconds/60
         let second = seconds%60
         return String(format: "%d:%02d", minute, second)
     }
-}
-
-#Preview {
-    ChatView()
 }
