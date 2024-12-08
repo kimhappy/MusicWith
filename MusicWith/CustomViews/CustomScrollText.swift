@@ -9,22 +9,22 @@ public struct CustomScrollText : View {
     var rightFade: CGFloat      = 3.0
     var startDelay: Double      = 0.0
     var alignment: Alignment    = .leading
-    
+
     @State private var animate = false
     var isCompact = false
-    
+
     public var body : some View {
         let stringWidth = text.widthOfString(usingFont: font)
         let stringHeight = text.heightOfString(usingFont: font)
-        
+
         let animation = Animation
             .linear(duration: Double(stringWidth) / 30)
             .delay(startDelay)
             .repeatForever(autoreverses: false)
-        
+
         let nullAnimation = Animation
             .linear(duration: 0)
-        
+
         return ZStack {
             GeometryReader { geo in
                 if stringWidth > geo.size.width { // don't use self.animate as conditional here
@@ -41,7 +41,7 @@ public struct CustomScrollText : View {
                             }
                             .fixedSize(horizontal: true, vertical: false)
                             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
-                        
+
                         Text(self.text)
                             .lineLimit(1)
                             .font(.init(font))
@@ -58,7 +58,7 @@ public struct CustomScrollText : View {
                     .onValueChanged(of: self.text, perform: {text in
                         self.animate = geo.size.width < stringWidth
                     })
-                    
+
                     .offset(x: leftFade)
                     .mask(
                         HStack(spacing:0) {
@@ -91,7 +91,7 @@ public struct CustomScrollText : View {
         .onDisappear { self.animate = false }
 
     }
-    
+
     public init(text: String, font: UIFont, leftFade: CGFloat, rightFade: CGFloat, startDelay: Double, alignment: Alignment? = nil) {
         self.text = text
         self.font = font
@@ -100,11 +100,11 @@ public struct CustomScrollText : View {
         self.startDelay = startDelay
         self.alignment = alignment != nil ? alignment! : .topLeading
     }
-    
+
     public init(text: String) {
         self.text = text
     }
-    
+
     public init(text : String, font : UIFont) {
         self.text = text
         self.font = font
@@ -120,7 +120,7 @@ extension CustomScrollText {
 }
 
 extension String {
-    
+
     func widthOfString(usingFont font: UIFont) -> CGFloat {
         let fontAttributes = [NSAttributedString.Key.font: font]
         let size = self.size(withAttributes: fontAttributes)

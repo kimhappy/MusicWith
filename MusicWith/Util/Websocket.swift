@@ -11,7 +11,7 @@ import SwiftUI
 class NetworkService: ObservableObject {
     static  let shared                                  = NetworkService()
     private var webSocketTask: URLSessionWebSocketTask?
-    
+
     struct ChatNotice: Decodable {
         let Chat: ChatInfo
         struct ChatInfo: Decodable {
@@ -59,7 +59,7 @@ class NetworkService: ObservableObject {
             let items: [String]
         }
     }
-    
+
     struct AskChat: Encodable {
         let Chat: ChatInfo
         struct ChatInfo : Encodable {
@@ -82,7 +82,7 @@ class NetworkService: ObservableObject {
         let Online: Temp
         struct Temp: Encodable { }
     }
-    
+
     func connect(trackId: String, userId: String, chats: Binding<[Chat]>) async {
         guard let url = URL(string: "ws://127.0.0.1:8000/chat/\(trackId)/\(userId)") else {return}
         let request = URLRequest(url: url)
@@ -90,14 +90,14 @@ class NetworkService: ObservableObject {
         webSocketTask?.resume()
         //self.startPing()
         receiveMessage(chats: chats)
-        
+
     }
-    
+
     func disconnect() {
         webSocketTask?.cancel(with: .goingAway, reason: nil)
         webSocketTask = nil
     }
-    
+
     private func receiveMessage(chats: Binding<[Chat]>) {
         webSocketTask?.receive(completionHandler: { [weak self] result in
             switch result {
@@ -116,13 +116,13 @@ class NetworkService: ObservableObject {
             self?.receiveMessage(chats: chats)
         })
     }
-    
-    
+
+
     private func handleMessage(_ message: String, chats: Binding<[Chat]>) {
         let json = message.data(using: .utf8)!
-        
+
         print(message)
-        
+
         if(message.contains("Chat")) {
             guard let info = try? JSONDecoder().decode(ChatNotice.self, from: json) else {return}
             let newChat = Chat(id: info.Chat.chat_id, user: info.Chat.user_id, text: info.Chat.content, timeSong: info.Chat.time, parentId: info.Chat.reply_to)
@@ -133,7 +133,7 @@ class NetworkService: ObservableObject {
             //print("Delete response received")
             chats.wrappedValue = []
             self.askHistory()
-            
+
         }
         if(message.contains("Join")) {
             guard let info = try? JSONDecoder().decode(JoinUser.self, from: json) else {return}
@@ -155,7 +155,7 @@ class NetworkService: ObservableObject {
             print("Online response received")
         }
     }
-    
+
     func sendChat(content: String, time: Int?, reply_to: String?) {
         let msg = AskChat(Chat: AskChat.ChatInfo(content: content, time: time, reply_to: reply_to))
         guard let json = try? JSONEncoder().encode(msg) else {
@@ -193,6 +193,6 @@ class NetworkService: ObservableObject {
         })
     }
     func askOnline() {
-        
+
     }
 }

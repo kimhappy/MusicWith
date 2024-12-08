@@ -17,7 +17,7 @@ extension Sequence {
 
             result.append(value)
         }
-        
+
         return result
     }
 }

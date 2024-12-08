@@ -23,7 +23,7 @@ enum AuthState {
         switch self {
         case .idle:
             return nil
-            
+
         case .tidalLoggedIn(let info):
             return info.auth
 

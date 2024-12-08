@@ -3,12 +3,12 @@ import Foundation
 class RecentSearch : ObservableObject {
     private let maxSearchCount = 10
     private let defaultsKey = "RecentSearches"
-    
+
     // 저장된 검색어 가져오기
     func myRecentSearches() -> [String] {
         UserDefaults.standard.stringArray(forKey: defaultsKey) ?? []
     }
-    
+
     func addRecentSearch(_ term: String) {
         var searches = myRecentSearches()
         if let index = searches.firstIndex(of: term) {
@@ -20,7 +20,7 @@ class RecentSearch : ObservableObject {
         }
         UserDefaults.standard.set(searches, forKey: defaultsKey)
     }
-    
+
     func deleteRecentSearch(_ term: String) {
         var searches = myRecentSearches()
         searches.removeAll { $0 == term }

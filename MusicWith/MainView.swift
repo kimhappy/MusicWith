@@ -68,7 +68,7 @@ struct MainView: View {
                         .font(.largeTitle)
                         .fontWeight(.heavy)
                         .foregroundColor(.black)
-                    
+
                     Text("Chatting and Listening music")
                         .font(.headline)
                         .fontDesign(.monospaced)
@@ -83,7 +83,7 @@ struct MainView: View {
                                 .scaledToFit()
                                 .frame(width: 24, height: 24)
                                 .foregroundColor(.white)
-                            
+
                             Text("Login with Tidal")
                                 .font(.headline)
                                 .fontWeight(.semibold)

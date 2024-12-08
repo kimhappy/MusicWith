@@ -42,7 +42,7 @@ class SpotifyTrack {
               let songUrl  = json         [ "uri" ] as?   String else { // 현재 preview_url 만 가능 확인, href, external_urls [spotify] 시도해 봄 -> 안 됨
             return nil
         }
-        
+
         var artistNames: [String] = []
 
         for artist in artists {
