@@ -12,6 +12,7 @@ struct ControlCoreView: View {
     @State       var songName     = ""
     @State       var songArtist   = ""
     @State       var songImageUrl = ""
+    @Environment(\.colorScheme) var colorSchema
 
     var body: some View {
         if let state = controlState.playState {
@@ -35,26 +36,29 @@ struct ControlCoreView: View {
                 VStack(alignment: .center) {
                     HStack {
                         Button(action : {
-                            Task { controlState.playPrev }
+                            Task {await controlState.playPrev() }
                         }) {
                             Image(systemName: "backward.fill")
                                 .frame(width: 50, height: 50)
+                                .foregroundStyle(colorSchema == .dark ? .white : .black)
                         }
                         .padding(.horizontal, 5)
                         Button(action : controlState.togglePlaying) {
                             Image(systemName: state.isPlaying ? "pause" : "play")
                                 .frame(width: 50, height: 50)
+                                .foregroundStyle(colorSchema == .dark ? .white : .black)
                         }
                         .padding(.horizontal, 5)
                         Button(action : {
-                            Task {controlState.playNext}
+                            Task {await controlState.playNext()}
                         }) {
                             Image(systemName: "forward.fill")
                                 .frame(width: 50, height: 50)
+                                .foregroundStyle(colorSchema == .dark ? .white : .black)
                         }
                         .padding(.horizontal, 5)
                     }
-                    .padding(.top, 50)
+                    .padding(.top, 80)
 
                     Slider(value: Binding(get: { state.now }, set: { newNow in
                         state.now = newNow
@@ -63,7 +67,7 @@ struct ControlCoreView: View {
                             controlState.seek(newNow)
                         }
                     }),
-
+                           
                     in: 0...state.duration,
                     onEditingChanged: { isEditing in
                         controlState.isDragging = isEditing
@@ -72,7 +76,15 @@ struct ControlCoreView: View {
                             controlState.seek(state.now)
                         }
                     })
-                    .padding(.bottom, 30)
+                    .accentColor(.black)
+                    HStack {
+                        Text(formatTime(controlState.playState?.now ?? 0.0))
+                            .font(.caption)
+                        Spacer()
+                        Text(formatTime(controlState.playState?.duration ?? 0.0))
+                            .font(.caption)
+                    }
+                    .padding(.bottom, 50)
                 }
             }
             .task {
@@ -85,6 +97,13 @@ struct ControlCoreView: View {
         else {
             EmptyView()
         }
+    }
+    
+    func formatTime(_ time : Double) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        
+        return String(format : "%02d:%02d", minutes, seconds)
     }
 }
 
