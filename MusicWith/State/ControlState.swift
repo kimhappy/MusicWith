@@ -43,11 +43,11 @@ class ControlState: ObservableObject {
 
         if playState.isPlaying {
             player.pause()
-            playState.isPlaying = false
+            self.playState!.isPlaying = false
         }
         else {
             player.play()
-            playState.isPlaying = true
+            self.playState!.isPlaying = true
         }
 
         stateSynchronization()
@@ -83,17 +83,17 @@ class ControlState: ObservableObject {
 
         guard let player, let playState else { return }
 
-        playState.isPlaying = true
-        playState.now       = 0.0
+        self.playState!.isPlaying = true
+        self.playState!.now       = 0.0
 
         guard let duration = player.currentItem?.asset.duration else { return }
-        playState.duration = CMTimeGetSeconds(duration)
+        self.playState!.duration = CMTimeGetSeconds(duration)
 
         timeObserver = player.addPeriodicTimeObserver(
             forInterval: CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC)),
             queue      : .main) { time in
             if self.isDragging { return } // slider dragging 도중에는 now 갱신 안하도록
-            playState.now = CMTimeGetSeconds(time)
+            self.playState!.now = CMTimeGetSeconds(time)
             self.stateSynchronization()
         }
 
@@ -101,7 +101,7 @@ class ControlState: ObservableObject {
             forName: .AVPlayerItemDidPlayToEndTime,
             object : playerItem,
             queue  : .main) { _ in
-                playState.isPlaying = false
+                self.playState!.isPlaying = false
                 player.seek(to: .zero)
                 player.pause()
                 self.stateSynchronization()
