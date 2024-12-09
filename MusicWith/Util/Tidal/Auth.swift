@@ -79,7 +79,7 @@ class Auth: ObservableObject {
     )
     static private let _LOGIN_CONFIG                   = LoginConfig(customParams: [QueryParameter(key: "appMode", value: "iOS")])
 
-    static var shared = Auth()
+    static public var shared = Auth()
     private init() {}
 
     @Published var state: AuthState = .idle

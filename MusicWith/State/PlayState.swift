@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-class PlayState {
+struct PlayState {
     var song     : SpotifyTrack
     var isPlaying: Bool
     var duration : Double

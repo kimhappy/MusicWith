@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct PlayListsView: View {
-    @State var userName  : String               = ""
-    @State var playLists : [SpotifyPlayList]    = []
-    @State var showNumber                       = -1
-    @State var me        : SpotifyUser? // State로 두어야 무한 스크롤의 결과가 바로 표시됨
+    @State                      var userName   : String               = ""
+    @State                      var playLists  : [SpotifyPlayList]    = []
+    @State                      var showNumber                        = -1
+    @State                      var me         : SpotifyUser? // State로 두어야 무한 스크롤의 결과가 바로 표시됨
     @Environment(\.colorScheme) var colorSchema
-    @StateObject private var spotify      = SpotifyAPI  .shared
+    @StateObject                var spotify                           = SpotifyAPI  .shared
 
     var body: some View {
         ZStack {
@@ -65,12 +65,12 @@ struct PlayListsView: View {
                     playLists = await me.playList(idx: showNumber)
                 }
             }
-            Button(action: {spotify.logout()}) {
+            Button(action: { spotify.logout() }) {
                 Text("logout")
-                    .font(.system(size: 14, weight: .semibold)) // 작은 글씨 크기, 볼드체
-                    .padding(10) // 버튼 안의 여백
-                    .foregroundColor(Color.gray) // 텍스트 색상
-                    .cornerRadius(10) // 둥근 모서리
+                    .font(.system(size: 14, weight: .semibold))        // 작은 글씨 크기, 볼드체
+                    .padding(10)                                       // 버튼 안의 여백
+                    .foregroundColor(Color.gray)                       // 텍스트 색상
+                    .cornerRadius(10)                                  // 둥근 모서리
                     .shadow(color: Color.gray.opacity(0.3), radius: 5) // 약간 흐릿한 그림자 효과
             }
             .offset(x : 165, y : -320)

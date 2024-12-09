@@ -20,7 +20,7 @@ struct LyricsView: View {
                 ScrollView {
                     Text(lyric)
                         .lineSpacing(30)
-                        .offset(y:30)
+                        .offset(y: 30)
                         .padding(30)
                 }
             }

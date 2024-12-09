@@ -3,18 +3,18 @@ import Combine
 import Foundation
 
 public struct CustomScrollText : View {
-    public var text: String
-    var font: UIFont            = UIFont.preferredFont(forTextStyle: .body)
-    var leftFade: CGFloat       = 3.0
-    var rightFade: CGFloat      = 3.0
-    var startDelay: Double      = 0.0
-    var alignment: Alignment    = .leading
+    @State var animate = false
 
-    @State private var animate = false
-    var isCompact = false
+    var text      : String
+    var font      : UIFont    = UIFont.preferredFont(forTextStyle: .body)
+    var leftFade  : CGFloat   = 3.0
+    var rightFade : CGFloat   = 3.0
+    var startDelay: Double    = 0.0
+    var alignment : Alignment = .leading
+    var isCompact             = false
 
     public var body : some View {
-        let stringWidth = text.widthOfString(usingFont: font)
+        let stringWidth  = text.widthOfString (usingFont: font)
         let stringHeight = text.heightOfString(usingFont: font)
 
         let animation = Animation
@@ -76,7 +76,8 @@ public struct CustomScrollText : View {
                         })
                     .frame(width: geo.size.width + leftFade)
                     .offset(x: leftFade * -1)
-                } else {
+                }
+                else {
                     Text(self.text)
                         .font(.init(font))
                         .onValueChanged(of: self.text, perform: {text in
@@ -89,23 +90,22 @@ public struct CustomScrollText : View {
         .frame(height: stringHeight)
         .frame(maxWidth: isCompact ? stringWidth : nil)
         .onDisappear { self.animate = false }
-
     }
 
     public init(text: String, font: UIFont, leftFade: CGFloat, rightFade: CGFloat, startDelay: Double, alignment: Alignment? = nil) {
-        self.text = text
-        self.font = font
-        self.leftFade = leftFade
-        self.rightFade = rightFade
+        self.text       = text
+        self.font       = font
+        self.leftFade   = leftFade
+        self.rightFade  = rightFade
         self.startDelay = startDelay
-        self.alignment = alignment != nil ? alignment! : .topLeading
+        self.alignment  = alignment != nil ? alignment! : .topLeading
     }
 
     public init(text: String) {
         self.text = text
     }
 
-    public init(text : String, font : UIFont) {
+    public init(text: String, font: UIFont) {
         self.text = text
         self.font = font
     }
@@ -113,33 +113,33 @@ public struct CustomScrollText : View {
 
 extension CustomScrollText {
     public func makeCompact(_ compact: Bool = true) -> Self {
-        var view = self
+        var view       = self
         view.isCompact = compact
         return view
     }
 }
 
 extension String {
-
     func widthOfString(usingFont font: UIFont) -> CGFloat {
         let fontAttributes = [NSAttributedString.Key.font: font]
-        let size = self.size(withAttributes: fontAttributes)
+        let size           = self.size(withAttributes: fontAttributes)
         return size.width
     }
 
     func heightOfString(usingFont font: UIFont) -> CGFloat {
         let fontAttributes = [NSAttributedString.Key.font: font]
-        let size = self.size(withAttributes: fontAttributes)
+        let size           = self.size(withAttributes: fontAttributes)
         return size.height
     }
 }
 
 extension View {
     /// A backwards compatible wrapper for iOS 14 `onChange`
-    @ViewBuilder func onValueChanged<T: Equatable>(of value: T, perform onChange: @escaping (T) -> Void) -> some View {
+    @ViewBuilder func onValueChanged< T: Equatable >(of value: T, perform onChange: @escaping (T) -> Void) -> some View {
         if #available(iOS 14.0, *) {
             self.onChange(of: value, perform: onChange)
-        } else {
+        }
+        else {
             self.onReceive(Just(value)) { (value) in
                 onChange(value)
             }

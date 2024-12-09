@@ -9,7 +9,7 @@ import SwiftUI
 import AVFoundation
 
 class ControlState: ObservableObject {
-    static var shared = ControlState()
+    static public var shared = ControlState()
     private init() {}
 
     private var player      : AVPlayer?         = nil
@@ -25,10 +25,10 @@ class ControlState: ObservableObject {
             }
         }
     }
-    @Published var sheetHeight: SheetHeight         = .mini
-    @Published var isDragging                       = false // slider dragging 추적
-    @Published var playlist   : SpotifyPlayList?    = nil   // playlist 존재 여부 확인
-    @Published var musicIndex : Int?                = nil   // playlist 존재시 현재 음악의 index
+    @Published var sheetHeight: SheetHeight      = .mini
+    @Published var isDragging                    = false // slider dragging 추적
+    @Published var playlist   : SpotifyPlayList? = nil   // playlist 존재 여부 확인
+    @Published var musicIndex : Int?             = nil   // playlist 존재시 현재 음악의 index
 
     func setSong(song : SpotifyTrack) async -> Bool {
         guard let url = await URL(string: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3") else { return false }
@@ -71,6 +71,11 @@ class ControlState: ObservableObject {
         musicIndex   = nil
     }
 
+    private func stateSynchronization() {
+        let newplayState = playState
+        self.playState   = newplayState
+    }
+
     private func startPlayback(song: SpotifyTrack, url: URL) {
         let playerItem = AVPlayerItem(url: url)
         player         = AVPlayer(playerItem: playerItem)
@@ -110,11 +115,6 @@ class ControlState: ObservableObject {
         let targetTime = CMTime(seconds: time, preferredTimescale: 600)
         player.seek(to: targetTime)
         stateSynchronization()
-    }
-
-    private func stateSynchronization() {
-        let newplayState = playState
-        self.playState   = newplayState
     }
 
     func setPlaylist(_ list: SpotifyPlayList, _ song: SpotifyTrack) {

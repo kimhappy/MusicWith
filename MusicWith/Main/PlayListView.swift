@@ -10,11 +10,11 @@ import SwiftUI
 struct PlayListView: View {
     let playlist: SpotifyPlayList
 
-    @State               var songList    : [SpotifyTrack] = []
-    @State               var showNumber                   = 0;
-    @StateObject         var controlState                 = ControlState.shared
-    @State               var playListName                 = ""
-    @State       private var isLoading                    = false
+    @State       var songList    : [SpotifyTrack] = []
+    @State       var showNumber                   = 0
+    @StateObject var controlState                 = ControlState.shared
+    @State       var playListName                 = ""
+    @State       var isLoading                    = false
 
     var body: some View {
         ScrollView {

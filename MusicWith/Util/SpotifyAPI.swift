@@ -9,7 +9,7 @@ import SwiftUI
 import KeychainSwift
 
 class SpotifyAPI: ObservableObject {
-    static var shared = SpotifyAPI()
+    static public var shared = SpotifyAPI()
 
     @Published var isLoggedIn = false
 

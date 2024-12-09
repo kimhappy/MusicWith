@@ -8,14 +8,43 @@
 import SwiftUI
 
 struct SearchView: View {
-    @State               var spotifySearch   : SpotifySearch?
-    @State               var searchedSongList: [SpotifyTrack] = []
-    @State       private var isSearched      : Bool           = false // isSearched
-    @State       private var searchText      : String         = ""    // 검색할 String
-    @State       private var searchNum       : Int            = 0     // Search Index 용도, 변화 X
-    @State               var recentSearchList                 = RecentSearch().myRecentSearches()
-    @StateObject private var recentSearch                     = RecentSearch()
-    @StateObject         var controlState                     = ControlState.shared
+    @State       var spotifySearch   : SpotifySearch?
+    @State       var searchedSongList: [SpotifyTrack] = []
+    @State       var isSearched      : Bool           = false // isSearched
+    @State       var searchText      : String         = ""    // 검색할 String
+    @State       var searchNum       : Int            = 0     // Search Index 용도, 변화 X
+    @State       var recentSearchList                 = RecentSearch().myRecentSearches()
+    @StateObject var recentSearch                     = RecentSearch()
+    @StateObject var controlState                     = ControlState.shared
+
+    private func deleteSearch() {
+        searchText       = ""
+        isSearched       = false
+        spotifySearch    = nil
+        searchedSongList = []
+    }
+
+    private func sendSearch() async {
+        // TODO: Implement Search and get Playlists
+        spotifySearch           = SpotifySearch(query: searchText)
+        searchedSongList        = []
+        guard let searchSuccess = spotifySearch else {return }
+
+        searchedSongList = await searchSuccess.track(idx: searchNum)
+        recentSearch.addRecentSearch(searchText)
+        recentSearchList = recentSearch.myRecentSearches()
+        isSearched = true
+    }
+
+    private func tapRecent(_ term : String) async{
+        searchText = term
+        await sendSearch()
+    }
+
+    private func deleteRecent(_ term : String) {
+        recentSearch.deleteRecentSearch(term)
+        recentSearchList = recentSearch.myRecentSearches()
+    }
 
     var body: some View {
         VStack {
@@ -133,34 +162,5 @@ struct SearchView: View {
                 Spacer()
             }
         }
-    }
-
-    private func deleteSearch() {
-        searchText       = ""
-        isSearched       = false
-        spotifySearch    = nil
-        searchedSongList = []
-    }
-
-    private func sendSearch() async {
-        // TODO: Implement Search and get Playlists
-        spotifySearch           = SpotifySearch(query: searchText)
-        searchedSongList        = []
-        guard let searchSuccess = spotifySearch else {return }
-
-        searchedSongList = await searchSuccess.track(idx: searchNum)
-        recentSearch.addRecentSearch(searchText)
-        recentSearchList = recentSearch.myRecentSearches()
-        isSearched = true
-    }
-
-    private func tapRecent(_ term : String) async{
-        searchText = term
-        await sendSearch()
-    }
-
-    private func deleteRecent(_ term : String) {
-        recentSearch.deleteRecentSearch(term)
-        recentSearchList = recentSearch.myRecentSearches()
     }
 }

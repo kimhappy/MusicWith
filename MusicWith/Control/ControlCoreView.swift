@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct ControlCoreView: View {
-    @StateObject var controlState = ControlState.shared
-    @State       var songName     = ""
-    @State       var songArtist   = ""
-    @State       var songImageUrl = ""
+    @StateObject                var controlState = ControlState.shared
+    @State                      var songName     = ""
+    @State                      var songArtist   = ""
+    @State                      var songImageUrl = ""
     @Environment(\.colorScheme) var colorSchema
 
     var body: some View {
@@ -36,7 +36,7 @@ struct ControlCoreView: View {
                 VStack(alignment: .center) {
                     HStack {
                         Button(action : {
-                            Task {await controlState.playPrev() }
+                            Task { await controlState.playPrev() }
                         }) {
                             Image(systemName: "backward.fill")
                                 .frame(width: 50, height: 50)
@@ -50,7 +50,7 @@ struct ControlCoreView: View {
                         }
                         .padding(.horizontal, 5)
                         Button(action : {
-                            Task {await controlState.playNext()}
+                            Task { await controlState.playNext() }
                         }) {
                             Image(systemName: "forward.fill")
                                 .frame(width: 50, height: 50)

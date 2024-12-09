@@ -10,8 +10,8 @@ import Combine
 
 struct Chat: Identifiable, Equatable {
     let id      : String
-    let user    : String // sending user
+    let user    : String  // sending user
     var text    : String? // text
-    var timeSong: Int? // chatted playtime of the song
+    var timeSong: Int?    // chatted playtime of the song
     var parentId: String?
 }

@@ -22,7 +22,7 @@ enum PlayerState {
 }
 
 class TrackPlayer: ObservableObject {
-    static var shared = TrackPlayer()
+    static public var shared = TrackPlayer()
     private init() {}
 
     @Published var state: PlayerState = .idle

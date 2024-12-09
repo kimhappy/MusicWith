@@ -9,17 +9,48 @@ import SwiftUI
 import Combine
 
 struct ChatView: View {
-    @StateObject    var controlState                    = ControlState.shared
-    @ObservedObject var networkService                  = NetworkService.shared
-    @State private  var messageText     : String        = ""
-    @State private  var isSelected      : Bool          = false
-    @State private  var isDeleteSelected: Bool          = false
-    @State private  var isLongSelected  : Bool          = false
-    @State private  var selectedParentId: String?       = nil
-    @State private  var selectedDeleteId: String?       = nil
-    @State          var chats           : [Chat]        = []
-    @State          var trackId         : String        = ""
-    let testUserId: String = "testuser"
+    @StateObject    var controlState              = ControlState  .shared
+    @ObservedObject var networkService            = NetworkService.shared
+    @State          var messageText     : String  = ""
+    @State          var isSelected      : Bool    = false
+    @State          var isDeleteSelected: Bool    = false
+    @State          var isLongSelected  : Bool    = false
+    @State          var selectedParentId: String? = nil
+    @State          var selectedDeleteId: String? = nil
+    @State          var chats           : [Chat]  = []
+    @State          var trackId         : String  = ""
+
+    // TODO: ???
+    static let testUserId: String = "testuser"
+
+    private func sendMessage() {
+        if messageText.isEmpty {
+            return
+        }
+
+        if (isSelected) { // reply
+            networkService.sendChat(content: messageText, time: nil, reply_to: selectedParentId)
+            messageText      = ""
+            isSelected       = false
+            selectedParentId = nil
+        }
+        else {
+            networkService.sendChat(content: messageText, time: Int(controlState.playState!.now), reply_to: nil)
+            messageText = ""
+        }
+    }
+
+    private func deleteMessage() {
+        networkService.askDelete(chatId: selectedDeleteId!)
+        isLongSelected   = false
+        selectedDeleteId = nil
+    }
+
+    private func timeFormat(seconds: Int) -> String {
+        let minute = seconds / 60
+        let second = seconds % 60
+        return String(format: "%d:%02d", minute, second)
+    }
 
     var body: some View {
         VStack {
@@ -51,7 +82,7 @@ struct ChatView: View {
                                         .fixedSize(horizontal: false, vertical: true)
                                     HStack {
                                         Button(action: {
-                                            isSelected = true
+                                            isSelected       = true
                                             selectedParentId = chat.id
                                         }) {
                                             Text("답글")
@@ -73,8 +104,8 @@ struct ChatView: View {
                                     .alert(isPresented: $isDeleteSelected) {
                                         Alert(
                                             title: Text("Alert"),
-                                            message        : Text("Are you sure you want to delete?"),
-                                            primaryButton  : .default(Text("Delete")) {
+                                            message      : Text("Are you sure you want to delete?"),
+                                            primaryButton: .default(Text("Delete")) {
                                                 deleteMessage()
                                             },
                                             secondaryButton: .cancel()
@@ -84,13 +115,13 @@ struct ChatView: View {
                                 .padding(.vertical, 20)
                             }
                         }
-                        //.padding(.vertical, 10)
-                        /*.overlay(
-                            Rectangle()
-                                .frame(height:1)
-                                .foregroundColor(.gray),
-                            alignment: .bottom
-                        )*/
+                        // .padding(.vertical, 10)
+                        // .overlay(
+                        //     Rectangle()
+                        //         .frame(height:1)
+                        //         .foregroundColor(.gray),
+                        //     alignment: .bottom
+                        // )
 
                         ForEach(chats) { chat2 in
                             if chat2.parentId == chat.id {
@@ -129,8 +160,8 @@ struct ChatView: View {
                                         .alert(isPresented: $isDeleteSelected) {
                                             Alert(
                                                 title: Text("Alert"),
-                                                message        : Text("Are you sure you want to delete?"),
-                                                primaryButton  : .default(Text("Delete")) {
+                                                message      : Text("Are you sure you want to delete?"),
+                                                primaryButton: .default(Text("Delete")) {
                                                     deleteMessage()
                                                 },
                                                 secondaryButton: .cancel()
@@ -139,15 +170,15 @@ struct ChatView: View {
                                     }
                                     .padding(.bottom, 20)
                                 }
-                                /*.overlay(
-                                    Rectangle()
-                                        .frame(height:1)
-                                        .foregroundColor(.gray),
-                                    alignment: .bottom
-                                )*/
+                                // .overlay(
+                                //     Rectangle()
+                                //         .frame(height:1)
+                                //         .foregroundColor(.gray),
+                                //     alignment: .bottom
+                                // )
                             }
                         }
-                        //.padding(.vertical, 10)
+                        // .padding(.vertical, 10)
                     }
 
                     .padding(.bottom, 0.1)
@@ -170,7 +201,7 @@ struct ChatView: View {
                         Text("취소")
                             .padding(.trailing, 30)
                             .onTapGesture {
-                                isSelected = false
+                                isSelected       = false
                                 selectedParentId = nil
                             }
                     }
@@ -178,18 +209,18 @@ struct ChatView: View {
                     HStack {
                         TextField("입력", text: $messageText)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(.system(size:20))
+                            .font(.system(size: 20))
                             .padding()
                         Button(action: {
                             sendMessage()
                         }) {
                             Text("전송")
-                                .font(.system(size:20))
+                                .font(.system(size: 20))
                                 .padding(10)
                                 .foregroundColor(.white)
                                 .background(Color.blue)
                                 .cornerRadius(10)
-                                .offset(x:-11)
+                                .offset(x: -11)
                         }
                     }
                 }
@@ -197,18 +228,18 @@ struct ChatView: View {
                     HStack {
                         TextField("입력", text: $messageText)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(.system(size:20))
+                            .font(.system(size: 20))
                             .padding()
                         Button(action: {
                             sendMessage()
                         }) {
                             Text("전송")
-                                .font(.system(size:20))
+                                .font(.system(size: 20))
                                 .padding(10)
                                 .foregroundColor(.white)
                                 .background(Color.blue)
                                 .cornerRadius(10)
-                                .offset(x:-11)
+                                .offset(x: -11)
                         }
                     }
                 }
@@ -218,6 +249,7 @@ struct ChatView: View {
             if let state = controlState.playState {
                 trackId  = state.song.trackId
             }
+
             await networkService.connect(trackId: "10", userId: "testuser", chats: $chats)
             let _ = print(trackId)
             networkService.askHistory()
@@ -226,35 +258,5 @@ struct ChatView: View {
             networkService.disconnect()
             chats = []
         }
-    }
-
-    private func sendMessage() {
-        if messageText.isEmpty {
-            return
-        }
-
-        if(isSelected) {    // reply
-            networkService.sendChat(content: messageText, time: nil, reply_to: selectedParentId)
-            messageText      = ""
-            isSelected       = false
-            selectedParentId = nil
-        }
-        else {
-            networkService.sendChat(content: messageText, time: Int(controlState.playState!.now), reply_to: nil)
-            messageText = ""
-        }
-    }
-
-    private func deleteMessage() {
-        //if()
-        networkService.askDelete(chatId: selectedDeleteId!)
-        isLongSelected   = false
-        selectedDeleteId = nil
-    }
-
-    func timeFormat(seconds: Int) -> String {
-        let minute = seconds/60
-        let second = seconds%60
-        return String(format: "%d:%02d", minute, second)
     }
 }
