@@ -6,55 +6,70 @@
 //
 
 import SwiftUI
+import Combine
+import Foundation
 
 struct RecommendView: View {
-    @State var playLists: [SpotifyPlayList] = [] // TODO: recommendList 구해야함
+    @State var tracks: [SpotifyTrack]                     = [] // TODO: recommendList 구해야함
+    @StateObject         var controlState                 = ControlState.shared
     @State var recommend: SpotifyRecommend?
-
+    @Environment(\.colorScheme) var colorSchema
+   
+    let columns = [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
+    
     var body: some View {
         VStack {
-            Text("추천 플레이리스트")
+            Text("현재 인기 있는 음악")
                 .font(.title)
                 .padding(.top, 20)
             ScrollView {
-                LazyVStack {
-                    ForEach(playLists, id: \.playListId) { playlist in
-                        NavigationLink(destination: PlayListView(playlist: playlist)) {
-                            HStack {
-                                AsyncImage(url: URL(string: playlist.imageURL ?? "")) { image in
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: 50, height: 50)
-                                        .clipped()
-                                } placeholder: {
-                                    ProgressView()
-                                        .frame(width: 50, height: 50)
-                                }
-                                Text(playlist.title ?? "Empty")
-                                    .foregroundColor(.black)
-                                    .padding(.leading, 20)
-                                Spacer()
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(tracks, id: \.trackId) { song in
+                        VStack {
+                            AsyncImage(url: URL(string: song.imageURL ?? "")) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 100, height: 100)
+                                    .clipped()
+                            } placeholder: {
+                                ProgressView()
+                                    .frame(width: 100, height: 100)
                             }
-                            .padding(.vertical, 5)
+                            CustomScrollText(text: song.title ?? "Empty", alignment: .center)
+                                .foregroundColor(colorSchema == .dark ? .white : .black)
+                
+                            Spacer()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(colorSchema == .dark ? .secondarySystemBackground : .systemBackground))
+                        .cornerRadius(12)
+                        .shadow(radius: 2)
+                        .onTapGesture {
+                            Task {
+                                await controlState.setSong(song: song)
+                            }
                         }
                         .onAppear {
                             Task {
-                                let lastIndex = playLists.count - 1
-
-                                if playlist.playListId == playLists[ lastIndex ].playListId {
-                                    playLists = await recommend?.playList(idx: 0) ?? []
+                                if song.trackId == tracks[tracks.count - 1].trackId {
+                                    // Infinite Scroll
                                 }
                             }
                         }
                     }
-                }
+                }.padding(.horizontal, 2)
             }
             .padding(.horizontal)
         }
         .task {
-            recommend = SpotifyRecommend()
-            playLists = await recommend?.playList(idx: 0) ?? []
+            // test 원할 시 만든 Playlist 중에서 변경
+            let playlist = SpotifyPlayList(playListId: "4yChwi9z4WjV2ppkIjwaxm")
+            tracks = await playlist.track(idx: -1)
         }
     }
 }
