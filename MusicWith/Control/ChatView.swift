@@ -21,6 +21,7 @@ struct ChatView: View {
     @State          var trackId         : String        = ""
     let testUserId: String = "testuser"
     @State          var activeUser      : [String]      = []
+    @Environment(\.colorScheme) var colorSchema
     
     var body: some View {
         VStack {
@@ -41,7 +42,7 @@ struct ChatView: View {
                                     HStack {
                                         Text(chat.user)
                                             .font(.headline)
-                                            .foregroundColor(activeUser.contains(chat.user) ? Color.red : Color.black)
+                                            .foregroundColor(activeUser.contains(chat.user) ? Color.red : colorSchema == .dark ? .white : .black)
                                         Spacer()
                                         Text(timeFormat(seconds: chat.timeSong!))
                                             .font(.subheadline)
@@ -108,7 +109,7 @@ struct ChatView: View {
                                         HStack {
                                             Text(chat2.user)
                                                 .font(.headline)
-                                                .foregroundColor(activeUser.contains(chat.user) ? Color.red : Color.black)
+                                                .foregroundColor(activeUser.contains(chat.user) ? Color.red : colorSchema == .dark ? .white : .black)
                                             Spacer()
                                             Text("")
                                         }
