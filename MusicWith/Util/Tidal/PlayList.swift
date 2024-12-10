@@ -44,16 +44,16 @@ struct PlayList {
             _storage[ id ] = PlayList(name: name, image: image, tracks: tracks)
         }
 
-        // TODO: artists, albums to struct
+        // TODO: to struct
         var tracks : [        [String]] = [ ] // id, name, isrc, artistId, albumId
-        var artists: [String:  String ] = [:] // name
-        var images : [String:  String ] = [:] // image
+        var artists: [String:  String ] = [:] // artistId -> name
+        var images : [String:  String ] = [:] // albumId -> image
 
         for item in included {
-            guard let id            = item[ "id"            ] as?  String      ,
+            guard let type          = item[ "type"          ] as?  String      ,
+                  let id            = item[ "id"            ] as?  String      ,
                   let attributes    = item[ "attributes"    ] as? [String: Any],
-                  let relationships = item[ "relationships" ] as? [String: Any],
-                  let type          = item[ "type"          ] as?  String
+                  let relationships = item[ "relationships" ] as? [String: Any]
             else {
                 return nil
             }
