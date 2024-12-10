@@ -9,16 +9,20 @@ import SwiftUI
 import Combine
 
 struct ChatView: View {
-    @StateObject    var controlState              = ControlState  .shared
-    @ObservedObject var networkService            = NetworkService.shared
-    @State          var messageText     : String  = ""
-    @State          var isSelected      : Bool    = false
-    @State          var isDeleteSelected: Bool    = false
-    @State          var isLongSelected  : Bool    = false
-    @State          var selectedParentId: String? = nil
-    @State          var selectedDeleteId: String? = nil
-    @State          var chats           : [Chat]  = []
-    @State          var trackId         : String  = ""
+    @StateObject                var controlState               = ControlState  .shared
+    @ObservedObject             var networkService             = NetworkService.shared
+    @State                      var messageText     : String   = ""
+    @State                      var isSelected      : Bool     = false
+    @State                      var isDeleteSelected: Bool     = false
+    @State                      var isLongSelected  : Bool     = false
+    @State                      var selectedParentId: String?  = nil
+    @State                      var selectedDeleteId: String?  = nil
+    @State                      var chats           : [Chat]   = []
+    @State                      var trackId         : String   = ""
+    @State                      var activeUser      : [String] = []
+    @Environment(\.colorScheme) var colorSchema
+
+    let testUserId: String = "testuser"
 
     // TODO: ???
     static let testUserId: String = "testuser"
@@ -71,6 +75,7 @@ struct ChatView: View {
                                     HStack {
                                         Text(chat.user)
                                             .font(.headline)
+                                            .foregroundColor(activeUser.contains(chat.user) ? Color.red : colorSchema == .dark ? .white : .black)
                                         Spacer()
                                         Text(timeFormat(seconds: chat.timeSong!))
                                             .font(.subheadline)
@@ -115,10 +120,9 @@ struct ChatView: View {
                                 .padding(.vertical, 20)
                             }
                         }
-                        // .padding(.vertical, 10)
                         // .overlay(
                         //     Rectangle()
-                        //         .frame(height:1)
+                        //         .frame(height:0.5)
                         //         .foregroundColor(.gray),
                         //     alignment: .bottom
                         // )
@@ -138,6 +142,7 @@ struct ChatView: View {
                                         HStack {
                                             Text(chat2.user)
                                                 .font(.headline)
+                                                .foregroundColor(activeUser.contains(chat.user) ? Color.red : colorSchema == .dark ? .white : .black)
                                             Spacer()
                                             Text("")
                                         }
@@ -249,8 +254,7 @@ struct ChatView: View {
             if let state = controlState.playState {
                 trackId  = state.song.trackId
             }
-
-            await networkService.connect(trackId: "10", userId: "testuser", chats: $chats)
+            await networkService.connect(trackId: "10", userId: "testuser", chats: $chats, activeUser: $activeUser)
             let _ = print(trackId)
             networkService.askHistory()
         }

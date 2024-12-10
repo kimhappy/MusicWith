@@ -96,13 +96,13 @@ class NetworkService: ObservableObject {
         struct Temp: Encodable { }
     }
 
-    func connect(trackId: String, userId: String, chats: Binding< [Chat] >) async {
-        guard let url = URL(string: "ws://127.0.0.1:8000/chat/\(trackId)/\(userId)") else { return }
-        let request   = URLRequest(url: url)
+    func connect(trackId: String, userId: String, chats: Binding< [Chat] >, activeUser: Binding< [String] >) async {
+        guard let url = URL(string: "ws://127.0.0.1:8000/chat/\(trackId)/\(userId)") else {return}
+        let request = URLRequest(url: url)
         webSocketTask = URLSession.shared.webSocketTask(with: request)
         webSocketTask?.resume()
         // self.startPing()
-        receiveMessage(chats: chats)
+        receiveMessage(chats: chats, activeUser: activeUser)
     }
 
     func disconnect() {
@@ -110,7 +110,7 @@ class NetworkService: ObservableObject {
         webSocketTask = nil
     }
 
-    private func receiveMessage(chats: Binding< [Chat] >) {
+    private func receiveMessage(chats: Binding< [Chat] >, activeUser: Binding< [String] >) {
         webSocketTask?.receive(completionHandler: { [weak self] result in
             switch result {
             case.failure(let error):
@@ -118,25 +118,25 @@ class NetworkService: ObservableObject {
             case.success(let message):
                 switch message {
                 case.string(let stringMessage):
-                    self?.handleMessage(stringMessage, chats: chats)
+                    self?.handleMessage(stringMessage, chats: chats, activeUser: activeUser)
                 case.data:
                     break
                 @unknown default:
                     break
                 }
             }
-
-            self?.receiveMessage(chats: chats)
+            self?.receiveMessage(chats: chats, activeUser: activeUser)
         })
     }
 
-    private func handleMessage(_ message: String, chats: Binding< [Chat] >) {
+
+    private func handleMessage(_ message: String, chats: Binding< [Chat] >, activeUser: Binding< [String] >) {
         let json = message.data(using: .utf8)!
 
-        print(message)
+        // print(message)
 
         if (message.contains("Chat")) {
-            guard let info = try? JSONDecoder().decode(ChatNotice.self, from: json) else { return }
+            guard let info = try? JSONDecoder().decode(ChatNotice.self, from: json) else {return}
             let newChat = Chat(id: info.Chat.chat_id, user: info.Chat.user_id, text: info.Chat.content, timeSong: info.Chat.time, parentId: info.Chat.reply_to)
             chats.wrappedValue.append(newChat)
         }
@@ -149,13 +149,14 @@ class NetworkService: ObservableObject {
         }
 
         if (message.contains("Join")) {
-            guard let info = try? JSONDecoder().decode(JoinUser.self, from: json) else { return }
-            print("Join response received")
+            guard let info = try? JSONDecoder().decode(JoinUser.self, from: json) else {return}
+            // print("Join response received")
+            self.askOnline()
         }
-
         if (message.contains("Leave")) {
-            guard let info = try? JSONDecoder().decode(LeaveUser.self, from: json) else { return }
-            print("Leave response received")
+            guard let info = try? JSONDecoder().decode(LeaveUser.self, from: json) else {return}
+            self.askOnline()
+            // print("Leave response received")
         }
 
         if (message.contains("History")) {
@@ -169,7 +170,8 @@ class NetworkService: ObservableObject {
 
         if (message.contains("Online")) {
             guard let info = try? JSONDecoder().decode(OnlineUserResponse.self, from: json) else {return}
-            print("Online response received")
+            // print("Online response received")
+            activeUser.wrappedValue = info.Online.items
         }
     }
 
@@ -213,6 +215,18 @@ class NetworkService: ObservableObject {
     }
 
     func askOnline() {
+        let msg = AskOnlineUser(Online: AskOnlineUser.Temp())
 
+        guard let json = try? JSONEncoder().encode(msg)
+        else {
+            return
+        }
+
+        let message = String(data: json, encoding: .utf8)!
+        webSocketTask?.send(.string(message), completionHandler: { error in
+            if let error = error {
+                print(error.localizedDescription)
+            }
+        })
     }
 }
