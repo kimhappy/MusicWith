@@ -109,6 +109,11 @@ public struct CustomScrollText : View {
         self.text = text
         self.font = font
     }
+    
+    public init(text : String, alignment : Alignment) {
+        self.text = text
+        self.alignment = alignment
+    }
 }
 
 extension CustomScrollText {
