@@ -60,24 +60,24 @@ enum AuthState {
 }
 
 class Auth: ObservableObject {
-    static private let _CLIENT_ID                      = "tzfjQ4wkhk1IALRq"
-    static private let _CLIENT_UNIQUE_KEY              = UUID().uuidString
-    static private let _CREDENTIALS_KEY                = "auth-storage" // Bundle.main.bundleIdentifier!
-    static private let _SCOPES         : Set< String > = []
-    static private let _CUSTOM_SCHEME                  = "com.kimhappy.musicwith"
-    static private let _REDIRECT_URI                   = "com.kimhappy.musicwith://login"
-    static private let _AUTH_CONFIG                    = AuthConfig(
+    static private let _CLIENT_ID                        = "tzfjQ4wkhk1IALRq"
+    static private let _CLIENT_UNIQUE_KEY                = UUID().uuidString
+    static private let _CREDENTIALS_KEY                  = "auth-storage" // Bundle.main.bundleIdentifier!
+    static private let _SCOPES           : Set< String > = ["user.read", "entitlements.read", "playlists.read", "recommendations.read"]
+    static private let _CUSTOM_SCHEME                    = "com.kimhappy.musicwith"
+    static private let _REDIRECT_URI                     = "com.kimhappy.musicwith://login"
+    static private let _AUTH_CONFIG                      = AuthConfig(
         clientId       : _CLIENT_ID        ,
         clientUniqueKey: _CLIENT_UNIQUE_KEY,
         credentialsKey : _CREDENTIALS_KEY  ,
         scopes         : _SCOPES
     )
-    static private let _EVENT_CONFIG                   = EventConfig(
+    static private let _EVENT_CONFIG = EventConfig(
         credentialsProvider     : TidalAuth.shared,
         maxDiskUsageBytes       : 1_000_000       ,
         blockedConsentCategories: []
     )
-    static private let _LOGIN_CONFIG                   = LoginConfig(customParams: [QueryParameter(key: "appMode", value: "iOS")])
+    static private let _LOGIN_CONFIG = LoginConfig(customParams: [QueryParameter(key: "appMode", value: "iOS")])
 
     static public var shared = Auth()
     private init() {}
