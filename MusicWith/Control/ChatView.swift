@@ -20,6 +20,7 @@ struct ChatView: View {
     @State          var chats           : [Chat]        = []
     @State          var trackId         : String        = ""
     let testUserId: String = "testuser"
+    @State          var activeUser      : [String]      = []
     
     var body: some View {
         VStack {
@@ -40,6 +41,7 @@ struct ChatView: View {
                                     HStack {
                                         Text(chat.user)
                                             .font(.headline)
+                                            .foregroundColor(activeUser.contains(chat.user) ? Color.red : Color.black)
                                         Spacer()
                                         Text(timeFormat(seconds: chat.timeSong!))
                                             .font(.subheadline)
@@ -84,10 +86,9 @@ struct ChatView: View {
                                 .padding(.vertical, 20)
                             }
                         }
-                        //.padding(.vertical, 10)
                         /*.overlay(
                             Rectangle()
-                                .frame(height:1)
+                                .frame(height:0.5)
                                 .foregroundColor(.gray),
                             alignment: .bottom
                         )*/
@@ -107,6 +108,7 @@ struct ChatView: View {
                                         HStack {
                                             Text(chat2.user)
                                                 .font(.headline)
+                                                .foregroundColor(activeUser.contains(chat.user) ? Color.red : Color.black)
                                             Spacer()
                                             Text("")
                                         }
@@ -141,7 +143,7 @@ struct ChatView: View {
                                 }
                                 /*.overlay(
                                     Rectangle()
-                                        .frame(height:1)
+                                        .frame(height:0.5)
                                         .foregroundColor(.gray),
                                     alignment: .bottom
                                 )*/
@@ -218,7 +220,7 @@ struct ChatView: View {
             if let state = controlState.playState {
                 trackId  = state.song.trackId
             }
-            await networkService.connect(trackId: "10", userId: "testuser", chats: $chats)
+            await networkService.connect(trackId: "10", userId: "testuser", chats: $chats, activeUser: $activeUser)
             let _ = print(trackId)
             networkService.askHistory()
         }
