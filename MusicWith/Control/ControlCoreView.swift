@@ -1,10 +1,3 @@
-//
-//  ControlCoreView.swift
-//  MusicWith
-//
-//  Created by kimhappy on 10/29/24.
-//
-
 import SwiftUI
 
 struct ControlCoreView: View {
@@ -15,6 +8,7 @@ struct ControlCoreView: View {
     @State       private var _trackArtist   = ""
     @State       private var _trackImageUrl = ""
     @State       private var _isDragging    = false
+    @State       private var _sliderValue   = 0.0
 
     public var body: some View {
         if let info = _tps.info() {
@@ -40,7 +34,7 @@ struct ControlCoreView: View {
                 VStack(alignment: .center) {
                     HStack {
                         Button(action : {
-                            // TODO: Play previous track
+                            // TODO: 이전 곡 재생
                         }) {
                             Image(systemName: "backward.fill")
                                 .frame(width: 50, height: 50)
@@ -54,7 +48,7 @@ struct ControlCoreView: View {
                         }
                         .padding(.horizontal, 5)
                         Button(action : {
-                            // TODO: Play next track
+                            // TODO: 다음 곡 재생
                         }) {
                             Image(systemName: "forward.fill")
                                 .frame(width: 50, height: 50)
@@ -66,24 +60,30 @@ struct ControlCoreView: View {
 
                     Slider(
                         value: Binding(
-                            get: { info.now },
-                            set: { newNow in
+                            get: {
+                                _isDragging ? _sliderValue : info.now
+                            },
+                            set: { newValue in
+                                _sliderValue = newValue
+
                                 if !_isDragging {
-                                    _tps.seek(newNow)
+                                    _tps.seek(newValue)
                                 }
-                            }),
-                        in              : 0...info.duration,
+                            }
+                        ),
+                        in: 0...info.duration,
                         onEditingChanged: { isEditing in
                             _isDragging = isEditing
 
-                            // TODO: ???
-    //                        if !isEditing {
-    //                            _tps.seek(info.now)
-    //                        }
-                        })
-                        .accentColor(.black)
+                            if !isEditing {
+                                _tps.seek(_sliderValue)
+                            }
+                        }
+                    )
+                    .tint(.black)
+
                     HStack {
-                        Text(timeFormat(lround(info.now)))
+                        Text(timeFormat(lround(_isDragging ? _sliderValue : info.now)))
                             .font(.caption)
                         Spacer()
                         Text(timeFormat(lround(info.duration)))

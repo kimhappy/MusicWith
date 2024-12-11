@@ -52,10 +52,10 @@ enum AuthState {
 class Auth: ObservableObject {
     static private let _CLIENT_ID                        = "tzfjQ4wkhk1IALRq"
     static private let _CLIENT_UNIQUE_KEY                = UUID().uuidString
-    static private let _CREDENTIALS_KEY                  = "auth-storage" // Bundle.main.bundleIdentifier!
+    static private let _CREDENTIALS_KEY                  = Bundle.main.bundleIdentifier!
     static private let _SCOPES           : Set< String > = ["playlists.read", "entitlements.read", "collection.read", "user.read", "recommendations.read", "playback"]
-    static private let _CUSTOM_SCHEME                    = "com.kimhappy.musicwith"
-    static private let _REDIRECT_URI                     = "com.kimhappy.musicwith://login"
+    static private let _CUSTOM_SCHEME                    = Bundle.main.bundleIdentifier!
+    static private let _REDIRECT_URI                     = Bundle.main.bundleIdentifier! + "://login"
     static private let _AUTH_CONFIG                      = AuthConfig(
         clientId       : _CLIENT_ID        ,
         clientUniqueKey: _CLIENT_UNIQUE_KEY,

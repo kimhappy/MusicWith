@@ -133,12 +133,14 @@ class TrackPlayer: ObservableObject {
             return nil
 
         case .playing(let info):
-            _player!.seek(time)
+            _stopDisplayLink()
             state = .playing(PlayerInfo(trackId: info.trackId, duration: info.duration, now: time))
+            _player!.seek(time)
+            _startDisplayLink()
 
         case .paused(let info):
-            _player!.seek(time)
             state = .paused(PlayerInfo(trackId: info.trackId, duration: info.duration, now: time))
+            _player!.seek(time)
         }
 
         return ()
