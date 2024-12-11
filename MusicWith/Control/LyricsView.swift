@@ -33,14 +33,10 @@ struct LyricsView: View {
                                 .padding()
                         }
                     }
-                    /*Text(lyric)
-                        .lineSpacing(30)
-                        .offset(y:30)
-                        .padding(30)*/
                 }
             }
             .task {
-                (beginList, lineList) = await state.song.lyric() ?? ([],[])
+                (beginList, lineList) = await state.song.lyric() ?? ([0],["loading"])
             }
         }
     }
