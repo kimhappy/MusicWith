@@ -42,8 +42,8 @@ struct MainView: View {
                         .fontWeight(.heavy)
                         .foregroundColor(.black)
                     Text("Listen, Feel, Share.")
-                        .font(.headline)
-                        .fontDesign(.monospaced)
+                        .font           (.headline)
+                        .fontDesign     (.monospaced)
                         .foregroundColor(.black)
                     Spacer()
                     Button(action: { Task { await _as.login() } }) {

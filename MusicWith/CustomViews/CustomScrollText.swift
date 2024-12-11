@@ -69,7 +69,7 @@ public struct CustomScrollText: View {
                     .mask(
                         HStack(spacing:0) {
                             Rectangle()
-                                .frame(width:2)
+                                .frame  (width:2)
                                 .opacity(0)
                             LinearGradient(gradient: Gradient(colors: [Color.black.opacity(0), Color.black]), startPoint: /*@START_MENU_TOKEN@*/.leading/*@END_MENU_TOKEN@*/, endPoint: /*@START_MENU_TOKEN@*/.trailing/*@END_MENU_TOKEN@*/)
                                 .frame(width: _leftFade)
@@ -77,7 +77,7 @@ public struct CustomScrollText: View {
                             LinearGradient(gradient: Gradient(colors: [Color.black, Color.black.opacity(0)]), startPoint: /*@START_MENU_TOKEN@*/.leading/*@END_MENU_TOKEN@*/, endPoint: /*@START_MENU_TOKEN@*/.trailing/*@END_MENU_TOKEN@*/)
                                 .frame(width: _rightFade)
                             Rectangle()
-                                .frame(width:2)
+                                .frame  (width:2)
                                 .opacity(0)
                         })
                     .frame (width: geo.size.width + _leftFade)
@@ -114,6 +114,11 @@ public struct CustomScrollText: View {
     public init(text: String, font: UIFont) {
         self._text = text
         self._font = font
+    }
+
+    public init(text: String, alignment: Alignment) {
+        self._text      = text
+        self._alignment = alignment
     }
 }
 
