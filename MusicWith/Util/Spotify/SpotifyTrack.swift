@@ -9,13 +9,13 @@ import Foundation
 // https://developer.spotify.com/documentation/web-api/reference/get-track
 class SpotifyTrack {
     private var _storage: [String: Any] = [:]
-    private var _lyric  : String?
+    private var _lyric  : ([Int], [String])?
 
     let trackId : String
     let imageURL: String? // storage 에 넣은 후 함수로 받아올 경우 무한 loading 이 걸림 => await 안 쓰게 구현시도
     let title   : String?
 
-    init(trackId: String, name: String? = nil, artist: String? = nil, imageUrl: String? = nil, songUrl: String? = nil, lyric: String? = nil) {
+    init(trackId: String, name: String? = nil, artist: String? = nil, imageUrl: String? = nil, songUrl: String? = nil, lyric: ([Int], [String])? = nil) {
         self.trackId                = trackId
         self._lyric                 = lyric
         self._storage[ "name"     ] = name
@@ -81,7 +81,7 @@ class SpotifyTrack {
 
     func lyric() async -> ([Int], [String])? {
         if let lyric = _lyric {
-            return ([],[])
+            return lyric
         }
 
         guard let url = URL(string: "http://localhost:8000/lyrics?track_id=\(trackId)") else {
@@ -99,7 +99,7 @@ class SpotifyTrack {
         
         var beginList: [Int] = []
         var lineList: [String] = []
-        var lineMerged = ""
+        //var lineMerged = ""
 
         for line in lines {
             guard let begin   = line[ "begin"   ] as? Int,
@@ -108,10 +108,10 @@ class SpotifyTrack {
             }
             beginList.append(begin/1000)
             lineList.append(content)
-            lineMerged += content + "\n"
+            //lineMerged += content + "\n"
         }
 
-        _lyric = lineMerged
+        _lyric = (beginList, lineList)
         return (beginList, lineList)
     }
 }
