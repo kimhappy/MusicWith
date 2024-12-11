@@ -18,8 +18,7 @@ struct User {
             return id
         }
 
-        guard let url  = URL(string: "https://openapi.tidal.com/v2/users/me"),
-              let json = await Query.getTidalJson(url),
+        guard let json = await Query.getTidalJson("/users/me"),
               let data = json[ "data" ] as? [String: Any]
         else {
             return nil
@@ -34,8 +33,7 @@ struct User {
             return ret
         }
 
-        guard let url        = URL(string: "https://openapi.tidal.com/v2/users/\(id)"),
-              let json       = await Query.getTidalJson(url),
+        guard let json       = await Query.getTidalJson("/users/\(id)"),
               let data       = json      [ "data"       ] as? [String: Any],
               let attributes = data      [ "attributes" ] as? [String: Any],
               let name       = attributes[ "firstName"  ] as?  String

@@ -10,19 +10,18 @@ import Foundation
 struct Track {
     private static var _storage: [String: Track] = [:]
 
-    public var name    : String  // Track name
-    public var imageUrl: String? // Album art URL
-    public var artist  : String? // Artist name
+    public var name    : String
+    public var imageUrl: String?
+    public var artist  : String?
     public var isrc    : String?
-    public var lyrics  : String?
+    public var lyrics  : [Lyric]?
 
     private static func _load< T >(_ id: String, _ get: (Self?) -> T?) async -> T? {
         if let ret = get(_storage[ id ]) {
             return ret
         }
 
-        guard let url        = URL(string: "https://openapi.tidal.com/v2/tracks/\(id)?countryCode=KR&include=artists,albums"),
-              let json       = await Query.getTidalJson(url),
+        guard let json       = await Query.getTidalJson("/tracks/\(id)?countryCode=KR&include=artists,albums"),
               let data       = json            [ "data"       ] as?  [String: Any] ,
               let included   = json            [ "included"   ] as? [[String: Any]],
               let attributes = data            [ "attributes" ] as?  [String: Any] ,
@@ -105,8 +104,28 @@ struct Track {
         }
     }
 
-    public static func lyrics(_ id: String) async -> String? {
-        // TODO: Implement
-        return "TEST LYRICS 0\nTEST LYRICS 1\nTEST LYRICS 2"
+    public static func lyrics(_ id: String) async -> [Lyric]? {
+        if let ret = _storage[ id ]?.lyrics {
+            return ret
+        }
+
+        guard let trackIsrc = await isrc(id),
+              let json      = await Query.getMwJson("/lyrics?isrc=\(trackIsrc)"),
+              let lines     = json[ "lines" ] as? [[String: Any]]
+        else {
+            return nil
+        }
+
+        _storage[ id ]!.lyrics = lines.mapOptional {
+            switch ($0[ "begin" ] as? Double, $0[ "content" ] as? String) {
+            case (.some(let begin), .some(let content)):
+                return Lyric(begin: begin, content: content)
+
+            default:
+                return nil
+            }
+        }
+
+        return _storage[ id ]!.lyrics
     }
 }

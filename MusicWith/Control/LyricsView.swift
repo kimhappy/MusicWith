@@ -23,8 +23,9 @@ struct LyricsView: View {
             }
         }
         .task {
-            if let info = TrackPlayer.shared.info() {
-                _lyric = await Track.lyrics(info.trackId) ?? "가사가 지원되지 않는 트랙입니다."
+            if let info   = TrackPlayer.shared.info(),
+               let lyrics = await Track.lyrics(info.trackId) {
+                _lyric = lyrics.map(\.content).joined(separator: "\n")
             }
         }
     }

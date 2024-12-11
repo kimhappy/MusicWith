@@ -11,8 +11,8 @@ import QuartzCore
 
 struct PlayerInfo {
     var trackId : String
-    var duration: Double // Second
-    var now     : Double // Second
+    var duration: Double
+    var now     : Double
 }
 
 enum PlayerState {

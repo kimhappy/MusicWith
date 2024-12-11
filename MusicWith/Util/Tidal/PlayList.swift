@@ -16,8 +16,7 @@ struct PlayList {
     public var trackIds: [String]
 
     public static func myPlayListIds() async -> [String]? {
-        guard let url      = URL(string: "https://openapi.tidal.com/v2/playlists/me?include=items.albums,items.artists"),
-              let json     = await Query.getTidalJson(url),
+        guard let json     = await Query.getTidalJson("/playlists/me?include=items.albums,items.artists"),
               let data     = json[ "data"     ] as? [[String: Any]],
               let included = json[ "included" ] as? [[String: Any]]
         else {
@@ -102,8 +101,7 @@ struct PlayList {
             return ret
         }
 
-        guard let url        = URL(string: "https://openapi.tidal.com/v2/playlists/\(id)?countryCode=KR&include=items"),
-              let json       = await Query.getTidalJson(url),
+        guard let json       = await Query.getTidalJson("/playlists/\(id)?countryCode=KR&include=items"),
               let data       = json             [ "data"       ] as?  [String: Any] ,
               let included   = json             [ "included"   ] as? [[String: Any]],
               let attributes = data             [ "attributes" ] as?  [String: Any] ,
