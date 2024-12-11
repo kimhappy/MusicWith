@@ -31,7 +31,7 @@ class ControlState: ObservableObject {
     @Published var musicIndex : Int?                = nil   // playlist 존재시 현재 음악의 index
 
     func setSong(song : SpotifyTrack) async -> Bool {
-        guard let url = await URL(string: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3") else { return false }
+        guard let url = await URL(string: song.songUrl() ?? "") else { return false }
         showSheet     = true
         stopPlayback()
         startPlayback(song: song, url: url)
