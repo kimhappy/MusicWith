@@ -61,9 +61,9 @@ struct SearchView: View {
             if _isSearched {
                 ScrollView {
                     LazyVStack {
-                        ForEach(_searchResults, id: \.self) { searchResult in
+                        ForEach(1..<_searchResults.count, id: \.self) { index in
                             HStack {
-                                AsyncImage(url: URL(string: _imageUrls[ searchResult ] ?? "https://placehold.co/80")) { image in
+                                AsyncImage(url: URL(string: _imageUrls[ _searchResults[ index ] ] ?? "https://placehold.co/80")) { image in
                                     image
                                         .resizable  ()
                                         .aspectRatio(contentMode: .fill)
@@ -73,23 +73,23 @@ struct SearchView: View {
                                     ProgressView()
                                         .frame(width: 50, height: 50)
                                 }
-                                CustomScrollText(text: _names[ searchResult ] ?? "")
+                                CustomScrollText(text: _names[ _searchResults[ index ] ] ?? "")
                                     .padding(.leading, 20)
                                 Spacer()
                             }
                             .padding(.vertical, 5)
                             .onTapGesture {
-                                TrackPlayer     .shared.setTrack(searchResult)
+                                TrackPlayer     .shared.setTrack(_searchResults, index)
                                 ControlViewState.shared.showSheet = true
                             }
                             .task {
-                                if case nil = _names[ searchResult ] {
-                                    let name     = await Track.name    (searchResult)
-                                    let imageUrl = await Track.imageUrl(searchResult)
+                                if case nil = _names[ _searchResults[ index ] ] {
+                                    let name     = await Track.name    (_searchResults[ index ])
+                                    let imageUrl = await Track.imageUrl(_searchResults[ index ])
 
                                     DispatchQueue.main.async {
-                                        _names    [ searchResult ] = name
-                                        _imageUrls[ searchResult ] = imageUrl
+                                        _names    [ _searchResults[ index ] ] = name
+                                        _imageUrls[ _searchResults[ index ] ] = imageUrl
                                     }
                                 }
                             }

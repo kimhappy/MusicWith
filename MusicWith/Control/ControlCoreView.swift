@@ -34,7 +34,7 @@ struct ControlCoreView: View {
                 VStack(alignment: .center) {
                     HStack {
                         Button(action : {
-                            // TODO: 이전 곡 재생
+                            _tps.prev()
                         }) {
                             Image(systemName: "backward.fill")
                                 .frame(width: 50, height: 50)
@@ -48,7 +48,7 @@ struct ControlCoreView: View {
                         }
                         .padding(.horizontal, 5)
                         Button(action : {
-                            // TODO: 다음 곡 재생
+                            _tps.next()
                         }) {
                             Image(systemName: "forward.fill")
                                 .frame(width: 50, height: 50)
@@ -92,7 +92,7 @@ struct ControlCoreView: View {
                     .padding(.bottom, 50)
                 }
             }
-            .task {
+            .task(id: info.trackId) {
                 _trackName     = await Track.name    (info.trackId) ?? ""
                 _trackArtist   = await Track.artist  (info.trackId) ?? ""
                 _trackImageUrl = await Track.imageUrl(info.trackId) ?? ""

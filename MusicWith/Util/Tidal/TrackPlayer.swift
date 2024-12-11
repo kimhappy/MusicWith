@@ -27,6 +27,8 @@ class TrackPlayer: ObservableObject {
 
     @Published var state: PlayerState = .idle
 
+    private var _trackIds   : [String]       = []
+    private var _index      : Int            = 0
     private var _player     : Player?        = nil
     private var _displayLink: CADisplayLink? = nil
 
@@ -82,20 +84,23 @@ class TrackPlayer: ObservableObject {
         }
     }
 
-    public func setTrack(_ trackId: String?) -> ()? {
+    public func setTrack(_ trackIds: [String], _ index: Int) -> ()? {
         _stopDisplayLink()
         _stopPlayer()
-
-        guard let trackId
-        else {
-            state = .idle
-            return ()
-        }
-
-        _startPlayer(trackId)!
-        state = PlayerState.paused(PlayerInfo(trackId: trackId, duration: 0, now: 0))
+        _trackIds = trackIds
+        _index    = index
+        state = PlayerState.paused(PlayerInfo(trackId: _trackIds[ _index ], duration: 0, now: 0))
+        _startPlayer(_trackIds[ _index ])!
         play()!
         return ()
+    }
+
+    public func prev() -> ()? {
+        return setTrack(_trackIds, (_index + _trackIds.count - 1) % _trackIds.count)
+    }
+
+    public func next() -> ()? {
+        return setTrack(_trackIds, (_index + 1) % _trackIds.count)
     }
 
     public func play() -> ()? {
@@ -172,6 +177,6 @@ extension TrackPlayer: PlayerListener {
     public func mediaServicesWereReset() {}
 
     public func ended(_ mediaProduct: MediaProduct) {
-        pause()
+        next()
     }
 }

@@ -18,9 +18,9 @@ struct PlayListView: View {
     public var body: some View {
         ScrollView {
             LazyVStack {
-                ForEach(_trackIds, id: \.self) { trackId in
+                ForEach(0..<_trackIds.count, id: \.self) { index in
                     HStack {
-                        AsyncImage(url: URL(string: _imageUrls[ trackId ] ?? "https://placehold.co/80")) { image in
+                        AsyncImage(url: URL(string: _imageUrls[ _trackIds[ index ] ] ?? "https://placehold.co/80")) { image in
                             image
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
@@ -30,23 +30,23 @@ struct PlayListView: View {
                             ProgressView()
                                 .frame(width: 50, height: 50)
                         }
-                        CustomScrollText(text: _names[ trackId ] ?? "")
+                        CustomScrollText(text: _names[ _trackIds[ index ] ] ?? "")
                             .padding(.leading, 20)
                         Spacer()
                     }
                     .padding(.vertical, 5)
                     .onTapGesture {
-                        TrackPlayer     .shared.setTrack(trackId)
+                        TrackPlayer     .shared.setTrack(_trackIds, index)
                         ControlViewState.shared.showSheet = true
                     }
                     .task {
-                        if case nil = _names[ trackId ] {
-                            let name     = await Track.name    (trackId)
-                            let imageUrl = await Track.imageUrl(trackId)
+                        if case nil = _names[ _trackIds[ index ] ] {
+                            let name     = await Track.name    (_trackIds[ index ])
+                            let imageUrl = await Track.imageUrl(_trackIds[ index ])
 
                             DispatchQueue.main.async {
-                                _names    [ trackId ] = name
-                                _imageUrls[ trackId ] = imageUrl
+                                _names    [ _trackIds[ index ] ] = name
+                                _imageUrls[ _trackIds[ index ] ] = imageUrl
                             }
                         }
                     }
