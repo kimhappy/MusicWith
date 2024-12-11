@@ -8,20 +8,19 @@
 import SwiftUI
 
 struct PlayListView: View {
-    let playlist: SpotifyPlayList
+    public let playListId: String
 
-    @State       var songList    : [SpotifyTrack] = []
-    @State       var showNumber                   = 0
-    @StateObject var controlState                 = ControlState.shared
-    @State       var playListName                 = ""
-    @State       var isLoading                    = false
+    @State private var _playListName:  String  = ""
+    @State private var _trackIds    : [String] = []
+    @State private var _names       : [String: String] = [:]
+    @State private var _imageUrls   : [String: String] = [:]
 
-    var body: some View {
+    public var body: some View {
         ScrollView {
             LazyVStack {
-                ForEach(songList, id: \.trackId) { song in
+                ForEach(_trackIds, id: \.self) { trackId in
                     HStack {
-                        AsyncImage(url: URL(string: song.imageURL ?? "")) { image in
+                        AsyncImage(url: URL(string: _imageUrls[ trackId ] ?? "https://placehold.co/80")) { image in
                             image
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
@@ -31,23 +30,23 @@ struct PlayListView: View {
                             ProgressView()
                                 .frame(width: 50, height: 50)
                         }
-                        CustomScrollText(text: song.title ?? "")
+                        CustomScrollText(text: _names[ trackId ] ?? "")
                             .padding(.leading, 20)
                         Spacer()
                     }
                     .padding(.vertical, 5)
                     .onTapGesture {
-                        // TODO: Fallback control
-                        Task {
-                            await controlState.setSong(song: song)
-                            controlState.setPlaylist(playlist, song)
-                            await controlState.setMusicIndex(playlist, song)
-                        }
+                        TrackPlayer     .shared.setTrack(trackId)
+                        ControlViewState.shared.showSheet = true
                     }
-                    .onAppear {
-                        Task {
-                            if song.trackId == songList[songList.count - 1].trackId {
-                                songList = await playlist.track(idx: showNumber)
+                    .task {
+                        if case nil = _names[ trackId ] {
+                            let name     = await Track.name    (trackId)
+                            let imageUrl = await Track.imageUrl(trackId)
+
+                            DispatchQueue.main.async {
+                                _names    [ trackId ] = name
+                                _imageUrls[ trackId ] = imageUrl
                             }
                         }
                     }
@@ -55,15 +54,10 @@ struct PlayListView: View {
             }
         }
         .padding(.horizontal)
-        .navigationTitle(playListName)
+        .navigationTitle(_playListName)
         .task {
-            songList     = await playlist.track(idx: showNumber)
-            playListName = await playlist.name() ?? "None"
-
-            for song in songList {
-                await song.name()
-                await song.imageUrl()
-            }
+            _playListName = await PlayList.name    (playListId) ?? ""
+            _trackIds     = await PlayList.trackIds(playListId) ?? []
         }
     }
 }

@@ -8,6 +8,8 @@
 import Foundation
 
 class Query {
+    private init() {}
+
     static public func getTidalJson(_ url: URL) async -> [String: Any]? {
         guard let token = await Auth.shared.state.token() else { return nil }
 
@@ -20,7 +22,7 @@ class Query {
     }
 
     static public func getMwJson(_ url: URL) async -> [String: Any]? {
-        var request = URLRequest(url: url)
+        let request = URLRequest(url: url)
         let data    = try? await URLSession.shared.data(for: request).0
         return data.flatMap { try? JSONSerialization.jsonObject(with: $0, options: []) as? [String: Any] }
     }

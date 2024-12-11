@@ -10,11 +10,11 @@ import Foundation
 struct Track {
     private static var _storage: [String: Track] = [:]
 
-    public var name  : String  // Track name
-    public var image : String? // Album art URL
-    public var artist: String? // Artist name
-    public var isrc  : String?
-    public var lyrics: String?
+    public var name    : String  // Track name
+    public var imageUrl: String? // Album art URL
+    public var artist  : String? // Artist name
+    public var isrc    : String?
+    public var lyrics  : String?
 
     private static func _load< T >(_ id: String, _ get: (Self?) -> T?) async -> T? {
         if let ret = get(_storage[ id ]) {
@@ -32,43 +32,52 @@ struct Track {
               let albumAttr  = included.first(where: { $0[ "type" ] as? String == "albums"  })?[ "attributes" ] as? [String: Any],
               let artist     = artistAttr      [ "name"       ] as?   String       ,
               let imageLinks = albumAttr       [ "imageLinks" ] as? [[String: Any]],
-              let image      = imageLinks.last?[ "href"       ] as?   String
+              let imageUrl   = imageLinks.last?[ "href"       ] as?   String
         else {
             return nil
         }
 
-        if let track = _storage[ id ] {
-            _storage[ id ]!.image  = image
-            _storage[ id ]!.artist = artist
-            _storage[ id ]!.isrc   = isrc
+        if var track = _storage[ id ] {
+            track.imageUrl = imageUrl
+            track.artist   = artist
+            track.isrc     = isrc
+            _storage[ id ] = track
         }
         else {
-            _storage[ id ] = Self(name: name, image: image, artist: artist, isrc: isrc, lyrics: nil)
+            _storage[ id ] = Self(name: name, imageUrl: imageUrl, artist: artist, isrc: isrc, lyrics: nil)
         }
 
         return get(_storage[ id ])
     }
 
     public static func register(_ id: String, _ newTrack: Track) {
-        if let oldTrack = _storage[ id ] {
-            if oldTrack.image == nil, newTrack.image != nil {
-                _storage[ id ]!.image = newTrack.image
+        if var oldTrack = _storage[ id ] {
+            if oldTrack.imageUrl == nil, newTrack.imageUrl != nil {
+                oldTrack.imageUrl = newTrack.imageUrl
             }
 
             if oldTrack.artist == nil, newTrack.artist != nil {
-                _storage[ id ]!.artist = newTrack.artist
+                oldTrack.artist = newTrack.artist
             }
 
             if oldTrack.isrc == nil, newTrack.isrc != nil {
-                _storage[ id ]!.isrc = newTrack.isrc
+                oldTrack.isrc = newTrack.isrc
             }
 
             if oldTrack.lyrics == nil, newTrack.lyrics != nil {
-                _storage[ id ]!.lyrics = newTrack.lyrics
+                oldTrack.lyrics = newTrack.lyrics
             }
+
+            _storage[ id ] = oldTrack
         }
         else {
             _storage[ id ] = newTrack
+        }
+    }
+
+    public static func track(_ id: String) async -> Track? {
+        return await _load(id) {
+            $0
         }
     }
 
@@ -84,9 +93,9 @@ struct Track {
         }
     }
 
-    public static func image(_ id: String) async -> String? {
+    public static func imageUrl(_ id: String) async -> String? {
         return await _load(id) {
-            $0?.image
+            $0?.imageUrl
         }
     }
 

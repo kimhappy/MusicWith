@@ -11,7 +11,7 @@ enum SheetHeight {
     case mini
     case full
 
-    func detent() -> PresentationDetent {
+    public func detent() -> PresentationDetent {
         switch self {
         case .mini: PresentationDetent.fraction(0.15)
         case .full: PresentationDetent.large

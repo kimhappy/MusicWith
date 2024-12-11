@@ -16,18 +16,14 @@ struct TidalAuthInfo {
 
 enum AuthState {
     case idle
-    case tidalLoggedIn(TidalAuthInfo)
-    case fullLoggedIn (TidalAuthInfo)
+    case loggedIn(TidalAuthInfo)
 
     public func auth() -> TidalAuth? {
         switch self {
         case .idle:
             return nil
 
-        case .tidalLoggedIn(let info):
-            return info.auth
-
-        case .fullLoggedIn(let info):
+        case .loggedIn(let info):
             return info.auth
         }
     }
@@ -37,10 +33,7 @@ enum AuthState {
         case .idle:
             return nil
 
-        case .tidalLoggedIn(let info):
-            return info.eventSender
-
-        case .fullLoggedIn(let info):
+        case .loggedIn(let info):
             return info.eventSender
         }
     }
@@ -50,10 +43,7 @@ enum AuthState {
         case .idle:
             return nil
 
-        case .tidalLoggedIn(let info):
-            return try? await info.auth.getCredentials().token
-
-        case .fullLoggedIn(let info):
+        case .loggedIn(let info):
             return try? await info.auth.getCredentials().token
         }
     }
@@ -63,7 +53,7 @@ class Auth: ObservableObject {
     static private let _CLIENT_ID                        = "tzfjQ4wkhk1IALRq"
     static private let _CLIENT_UNIQUE_KEY                = UUID().uuidString
     static private let _CREDENTIALS_KEY                  = "auth-storage" // Bundle.main.bundleIdentifier!
-    static private let _SCOPES           : Set< String > = ["user.read", "entitlements.read", "playlists.read", "recommendations.read"]
+    static private let _SCOPES           : Set< String > = ["playlists.read", "entitlements.read", "collection.read", "user.read", "recommendations.read", "playback"]
     static private let _CUSTOM_SCHEME                    = "com.kimhappy.musicwith"
     static private let _REDIRECT_URI                     = "com.kimhappy.musicwith://login"
     static private let _AUTH_CONFIG                      = AuthConfig(
@@ -84,13 +74,8 @@ class Auth: ObservableObject {
 
     @Published var state: AuthState = .idle
 
-    private func _checkMwAccount() async -> Bool? {
-        // TODO: Implement
-        return true
-    }
-
     @MainActor
-    public func tidalLogin() async -> ()? {
+    public func login() async -> ()? {
         class _PresentationContextProvider: NSObject, ASWebAuthenticationPresentationContextProviding {
             public func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
                 ASPresentationAnchor()
@@ -111,7 +96,7 @@ class Auth: ObservableObject {
                 url              : loginUrl           ,
                 callbackURLScheme: Auth._CUSTOM_SCHEME,
                 completionHandler: { [weak self] callbackURL, error in
-                    if let self,
+                    if self != nil,
                        let responseUrl = callbackURL?.absoluteString {
                         continuation.resume(returning: responseUrl)
                     }
@@ -130,17 +115,7 @@ class Auth: ObservableObject {
         }
 
         let authInfo = TidalAuthInfo(auth: auth, eventSender: eventSender)
-        self.state   = .tidalLoggedIn(authInfo)
-        return ()
-    }
-
-    public func mwRegister(_ name: String, _ picture: String?) async -> ()? {
-        // TODO: Implement
-        return ()
-    }
-
-    public func mwChange(_ name: String?, _ picture: String?) async -> ()? {
-        // TODO: Implement
+        self.state   = .loggedIn(authInfo)
         return ()
     }
 

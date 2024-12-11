@@ -11,9 +11,9 @@ import Foundation
 struct PlayList {
     private static var _storage: [String: PlayList] = [:]
 
-    public var name  :  String
-    public var image :  String
-    public var tracks: [String]
+    public var name    :  String
+    public var imageUrl:  String
+    public var trackIds: [String]
 
     public static func myPlayListIds() async -> [String]? {
         guard let url      = URL(string: "https://openapi.tidal.com/v2/playlists/me?include=items.albums,items.artists"),
@@ -32,22 +32,22 @@ struct PlayList {
                   let relationships = item             [ "relationships" ] as?  [String: Any] ,
                   let name          = attributes       [ "name"          ] as?   String       ,
                   let imageLinks    = attributes       [ "imageLinks"    ] as? [[String: Any]],
-                  let image         = imageLinks.first?[ "href"          ] as?   String       ,
+                  let imageUrl      = imageLinks.first?[ "href"          ] as?   String       ,
                   let items         = relationships    [ "items"         ] as?  [String: Any] ,
                   let itemsData     = items            [ "data"          ] as? [[String: Any]],
-                  let tracks        = itemsData.mapOptional({ $0[ "id" ] as? String })
+                  let trackIds      = itemsData.mapOptional({ $0[ "id" ] as? String })
             else {
                 return nil
             }
 
             ids.append(id)
-            _storage[ id ] = PlayList(name: name, image: image, tracks: tracks)
+            _storage[ id ] = PlayList(name: name, imageUrl: imageUrl, trackIds: trackIds)
         }
 
         // TODO: to struct
-        var tracks : [        [String]] = [ ] // id, name, isrc, artistId, albumId
-        var artists: [String:  String ] = [:] // artistId -> name
-        var images : [String:  String ] = [:] // albumId -> image
+        var tracks   : [        [String]] = [ ] // id, name, isrc, artistId, albumId
+        var artists  : [String:  String ] = [:] // artistId -> name
+        var imageUrls: [String:  String ] = [:] // albumId -> image
 
         for item in included {
             guard let type          = item[ "type"          ] as?  String      ,
@@ -76,7 +76,7 @@ struct PlayList {
             else if type == "albums",
                     let imageLinks = attributes      [ "imageLinks" ] as? [[String: Any]],
                     let image      = imageLinks.last?[ "href"       ] as?   String {
-                images[ id ] = image
+                imageUrls[ id ] = image
             }
             else {
                 return nil
@@ -84,14 +84,14 @@ struct PlayList {
         }
 
         for track in tracks {
-            let id       = track  [ 0        ]
-            let name     = track  [ 1        ]
-            let isrc     = track  [ 2        ]
-            let artistId = track  [ 3        ]
-            let albumId  = track  [ 4        ]
-            let artist   = artists[ artistId ]
-            let image    = images [ albumId  ]
-            Track.register(id, Track(name: name, image: image, artist: artist, isrc: isrc))
+            let id       = track    [ 0        ]
+            let name     = track    [ 1        ]
+            let isrc     = track    [ 2        ]
+            let artistId = track    [ 3        ]
+            let albumId  = track    [ 4        ]
+            let artist   = artists  [ artistId ]
+            let imageUrl = imageUrls[ albumId  ]
+            Track.register(id, Track(name: name, imageUrl: imageUrl, artist: artist, isrc: isrc))
         }
 
         return ids
@@ -109,12 +109,12 @@ struct PlayList {
               let attributes = data             [ "attributes" ] as?  [String: Any] ,
               let name       = attributes       [ "name"       ] as?   String       ,
               let imageLinks = attributes       [ "imageLinks" ] as? [[String: Any]],
-              let image      = imageLinks.first?[ "href"       ] as?   String
+              let imageUrl   = imageLinks.first?[ "href"       ] as?   String
         else {
             return nil
         }
 
-        var tracks: [String] = []
+        var trackIds: [String] = []
 
         for item in included {
             if let trackId         = item                 [ "id"         ] as?   String       ,
@@ -122,14 +122,20 @@ struct PlayList {
                let trackName       = trackAttributes      [ "title"      ] as?   String       ,
                let trackIsrc       = trackAttributes      [ "isrc"       ] as?   String       ,
                let trackImageLinks = trackAttributes      [ "imageLinks" ] as? [[String: Any]],
-               let trackImage      = trackImageLinks.last?[ "href"       ] as?   String {
-                tracks.append(trackId)
-                Track.register(trackId, Track(name: trackName, image: trackImage, isrc: trackIsrc))
+               let trackImageUrl   = trackImageLinks.last?[ "href"       ] as?   String {
+                trackIds.append(trackId)
+                Track.register(trackId, Track(name: trackName, imageUrl: trackImageUrl, isrc: trackIsrc))
             }
         }
 
-        _storage[ id ] = PlayList(name: name, image: image, tracks: tracks)
+        _storage[ id ] = PlayList(name: name, imageUrl: imageUrl, trackIds: trackIds)
         return get(_storage[ id ])
+    }
+
+    public static func playList(_ id: String) async -> PlayList? {
+        return await _load(id) {
+            $0
+        }
     }
 
     public static func name(_ id: String) async -> String? {
@@ -138,15 +144,15 @@ struct PlayList {
         }
     }
 
-    public static func image(_ id: String) async -> String? {
+    public static func imageUrl(_ id: String) async -> String? {
         return await _load(id) {
-            $0?.image
+            $0?.imageUrl
         }
     }
 
-    public static func tracks(_ id: String) async -> [String]? {
+    public static func trackIds(_ id: String) async -> [String]? {
         return await _load(id) {
-            $0?.tracks
+            $0?.trackIds
         }
     }
 }

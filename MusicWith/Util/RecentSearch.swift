@@ -1,12 +1,14 @@
 import Foundation
 
 class RecentSearch: ObservableObject {
-    private let maxSearchCount = 10
-    private let defaultsKey    = "RecentSearches"
+    static private let _MAX_SEARCH_COUNT = 10
+    static private let _DEFAULT_KEY      = "RecentSearches"
 
-    // 저장된 검색어 가져오기
+    static public var shared = RecentSearch()
+    private init() {}
+
     public func myRecentSearches() -> [String] {
-        UserDefaults.standard.stringArray(forKey: defaultsKey) ?? []
+        UserDefaults.standard.stringArray(forKey: Self._DEFAULT_KEY) ?? []
     }
 
     public func addRecentSearch(_ term: String) {
@@ -18,16 +20,16 @@ class RecentSearch: ObservableObject {
 
         searches.insert(term, at: 0)
 
-        if searches.count > maxSearchCount {
+        if searches.count > Self._MAX_SEARCH_COUNT {
             searches.removeLast()
         }
 
-        UserDefaults.standard.set(searches, forKey: defaultsKey)
+        UserDefaults.standard.set(searches, forKey: Self._DEFAULT_KEY)
     }
 
     public func deleteRecentSearch(_ term: String) {
         var searches = myRecentSearches()
         searches.removeAll { $0 == term }
-        UserDefaults.standard.set(searches, forKey: defaultsKey)
+        UserDefaults.standard.set(searches, forKey: Self._DEFAULT_KEY)
     }
 }

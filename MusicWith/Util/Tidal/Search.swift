@@ -63,8 +63,8 @@ struct Search {
             let artistId = track  [ 3        ]
             let albumId  = track  [ 4        ]
             let artist   = artists[ artistId ]
-            let image    = images [ albumId  ]
-            Track.register(id, Track(name: name, image: image, artist: artist, isrc: isrc))
+            let imageUrl = images [ albumId  ]
+            Track.register(id, Track(name: name, imageUrl: imageUrl, artist: artist, isrc: isrc))
         }
 
         return tracks.map { $0[ 0 ] }

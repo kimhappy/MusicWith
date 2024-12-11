@@ -8,12 +8,16 @@
 import Foundation
 
 struct User {
-    private static var _storage: [String: User] = [:]
+    private static var _myUserId:  String?
+    private static var _storage : [String: User] = [:]
 
-    public var name : String
-    public var image: String
+    public var name: String
 
     public static func myUserId() async -> String? {
+        if let id = _myUserId {
+            return id
+        }
+
         guard let url  = URL(string: "https://openapi.tidal.com/v2/users/me"),
               let json = await Query.getTidalJson(url),
               let data = json[ "data" ] as? [String: Any]
@@ -21,7 +25,8 @@ struct User {
             return nil
         }
 
-        return data[ "id" ] as? String
+        _myUserId = data[ "id" ] as? String
+        return _myUserId
     }
 
     private static func _load< T >(_ id: String, _ get: (Self?) -> T?) async -> T? {
@@ -29,28 +34,28 @@ struct User {
             return ret
         }
 
-        guard let url   = URL(string: "http://http://127.0.0.1:8000/user/\(id)"),
-              let json  = await Query.getMwJson(url),
-              let name  = json[ "name"  ] as? String,
-              let image = json[ "image" ] as? String
+        guard let url        = URL(string: "https://openapi.tidal.com/v2/users/\(id)"),
+              let json       = await Query.getTidalJson(url),
+              let data       = json      [ "data"       ] as? [String: Any],
+              let attributes = data      [ "attributes" ] as? [String: Any],
+              let name       = attributes[ "firstName"  ] as?  String
         else {
             return nil
         }
 
-        // TODO: Self(name: name, image: image)
-        _storage[ id ] = Self(name: "USER \(id)", image: "https://placehold.co/80")
+        _storage[ id ] = Self(name: name)
         return get(_storage[ id ])
+    }
+
+    public static func user(_ id: String) async -> User? {
+        return await _load(id) {
+            $0
+        }
     }
 
     public static func name(_ id: String) async -> String? {
         return await _load(id) {
             $0?.name
-        }
-    }
-
-    public static func image(_ id: String) async -> String? {
-        return await _load(id) {
-            $0?.image
         }
     }
 }

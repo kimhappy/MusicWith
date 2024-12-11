@@ -8,24 +8,23 @@
 import SwiftUI
 
 struct LyricsView: View {
-    @StateObject var controlState = ControlState.shared
-    @State       var lyric        = ""
+    @State private var _lyric = ""
 
-    var body: some View {
-        if let state = controlState.playState {
-            VStack {
-                Text("가사")
-                    .padding(.top, 30)
-                    .font(.system(size: 20, weight: .semibold))
-                ScrollView {
-                    Text(lyric)
-                        .lineSpacing(30)
-                        .offset(y: 30)
-                        .padding(30)
-                }
+    public var body: some View {
+        VStack {
+            Text("가사")
+                .padding(.top, 30)
+                .font(.system(size: 20, weight: .semibold))
+            ScrollView {
+                Text(_lyric)
+                    .lineSpacing(30)
+                    .offset(y: 30)
+                    .padding(30)
             }
-            .task {
-                lyric = await state.song.lyric() ?? ""
+        }
+        .task {
+            if let info = TrackPlayer.shared.info() {
+                _lyric = await Track.lyrics(info.trackId) ?? "가사가 지원되지 않는 트랙입니다."
             }
         }
     }
