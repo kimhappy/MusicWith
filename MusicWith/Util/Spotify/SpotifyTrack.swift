@@ -79,9 +79,9 @@ class SpotifyTrack {
         return await load(key: "songUrl") as? String
     }
 
-    func lyric() async -> String? {
+    func lyric() async -> ([Int], [String])? {
         if let lyric = _lyric {
-            return lyric
+            return ([],[])
         }
 
         guard let url = URL(string: "http://localhost:8000/lyrics?track_id=\(trackId)") else {
@@ -96,7 +96,9 @@ class SpotifyTrack {
               let lines = json[ "lines" ] as? [[String: Any]] else {
             return nil
         }
-
+        
+        var beginList: [Int] = []
+        var lineList: [String] = []
         var lineMerged = ""
 
         for line in lines {
@@ -104,11 +106,12 @@ class SpotifyTrack {
                   let content = line[ "content" ] as? String else {
                 return nil
             }
-
+            beginList.append(begin/1000)
+            lineList.append(content)
             lineMerged += content + "\n"
         }
 
         _lyric = lineMerged
-        return lineMerged
+        return (beginList, lineList)
     }
 }
