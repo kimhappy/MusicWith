@@ -78,7 +78,7 @@ private struct _MessageView: View {
 
 struct ChatView: View {
     @ObservedObject             private var _nss                        = NetworkService.shared
-    @ObservedObject             private var _tps                        = TrackPlayer.shared
+    @ObservedObject             private var _tps                        = TrackPlayer   .shared
     @State                      private var _myUserId        : String   = ""
     @State                      private var _messageText     : String   = ""
     @State                      private var _isSelected      : Bool     = false
@@ -209,12 +209,15 @@ struct ChatView: View {
             )
         }
         .task {
-            if let userId = await User.myUserId(),
-               let info = _tps.info() {
+            if let userId = await User.myUserId() {
                 _myUserId = userId
-                await _nss.connect(trackId: info.trackId, userId: _myUserId, chats: $_chats, activeUser: $_activeUser)
-                _nss.askHistory()
             }
+        }
+        .task(id: _tps.info()!.trackId) {
+            _nss.disconnect()
+            _chats = []
+            await _nss.connect(trackId: _tps.info()!.trackId, userId: _myUserId, chats: $_chats, activeUser: $_activeUser)
+            _nss.askHistory()
         }
         .onDisappear {
             _nss.disconnect()

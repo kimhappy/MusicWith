@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct LyricsView: View {
-    @State private var _lyric = ""
+    @StateObject private var _tps    = TrackPlayer.shared
+    @State       private var _lyrics = ""
 
     public var body: some View {
         VStack {
@@ -16,17 +17,16 @@ struct LyricsView: View {
                 .padding(.top, 30)
                 .font(.system(size: 20, weight: .semibold))
             ScrollView {
-                Text(_lyric)
+                Text(_lyrics)
                     .lineSpacing(30)
                     .offset(y: 30)
                     .padding(30)
             }
         }
-        .task {
-            if let info   = TrackPlayer.shared.info(),
-               let lyrics = await Track.lyrics(info.trackId) {
-                _lyric = lyrics.map(\.content).joined(separator: "\n")
-            }
+        .task(id: _tps.info()!.trackId) {
+            let trackId = _tps.info()!.trackId
+            let lyrics  = await Track.lyrics(trackId) ?? []
+            _lyrics = lyrics.map(\.content).joined(separator: "\n")
         }
     }
 }

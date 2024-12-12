@@ -109,22 +109,24 @@ struct Track {
             return ret
         }
 
-        guard let trackIsrc = await isrc(id),
-              let json      = await Query.getMwJson("/lyrics?isrc=\(trackIsrc)"),
-              let lines     = json[ "lines" ] as? [[String: Any]]
-        else {
-            return nil
-        }
+//        guard let trackIsrc = await isrc(id),
+//              let json      = await Query.getMwJson("/lyrics?isrc=\(trackIsrc)"),
+//              let lines     = json[ "lines" ] as? [[String: Any]]
+//        else {
+//            return nil
+//        }
+//
+//        _storage[ id ]!.lyrics = lines.mapOptional {
+//            switch ($0[ "begin" ] as? Double, $0[ "content" ] as? String) {
+//            case (.some(let begin), .some(let content)):
+//                return Lyric(begin: begin, content: content)
+//
+//            default:
+//                return nil
+//            }
+//        }
 
-        _storage[ id ]!.lyrics = lines.mapOptional {
-            switch ($0[ "begin" ] as? Double, $0[ "content" ] as? String) {
-            case (.some(let begin), .some(let content)):
-                return Lyric(begin: begin, content: content)
-
-            default:
-                return nil
-            }
-        }
+        _storage[ id ]!.lyrics = [Lyric(begin: 0, content: "TEST LYRIC: \(id)")]
 
         return _storage[ id ]!.lyrics
     }
