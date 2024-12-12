@@ -67,7 +67,7 @@ struct PlayListsView: View {
                     _playListIds = await PlayList.myPlayListIds()         ?? []
                 }
             }
-            Button(action: Auth.shared.logout) {
+            Button(action: { Auth.shared.logout() }) {
                 Text("logout")
                     .font           (.system(size: 14, weight: .semibold))      // 작은 글씨 크기, 볼드체
                     .padding        (10)                                        // 버튼 안의 여백

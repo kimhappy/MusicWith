@@ -9,42 +9,17 @@ import EventProducer
 import Auth
 import AuthenticationServices
 
-struct TidalAuthInfo {
-    var auth       : TidalAuth
-    var eventSender: TidalEventSender
-}
-
 enum AuthState {
     case idle
-    case loggedIn(TidalAuthInfo)
-
-    public func auth() -> TidalAuth? {
-        switch self {
-        case .idle:
-            return nil
-
-        case .loggedIn(let info):
-            return info.auth
-        }
-    }
-
-    public func eventSender() -> TidalEventSender? {
-        switch self {
-        case .idle:
-            return nil
-
-        case .loggedIn(let info):
-            return info.eventSender
-        }
-    }
+    case loggedIn
 
     public func token() async -> String? {
         switch self {
         case .idle:
             return nil
 
-        case .loggedIn(let info):
-            return try? await info.auth.getCredentials().token
+        case .loggedIn:
+            return try? await TidalAuth.shared.getCredentials().token
         }
     }
 }
@@ -70,7 +45,15 @@ class Auth: ObservableObject {
     static private let _LOGIN_CONFIG = LoginConfig(customParams: [QueryParameter(key: "appMode", value: "iOS")])
 
     static public var shared = Auth()
-    private init() {}
+
+    private init() {
+        TidalAuth       .shared.config(config: Auth._AUTH_CONFIG )
+        TidalEventSender.shared.config(        Auth._EVENT_CONFIG)
+
+        if TidalAuth.shared.isUserLoggedIn {
+            state = .loggedIn
+        }
+    }
 
     @Published var state: AuthState = .idle
 
@@ -82,13 +65,7 @@ class Auth: ObservableObject {
             }
         }
 
-        let auth        = TidalAuth       .shared
-        let eventSender = TidalEventSender.shared
-
-        auth       .config(config: Auth._AUTH_CONFIG )
-        eventSender.config(        Auth._EVENT_CONFIG)
-
-        guard let loginUrl = auth.initializeLogin(
+        guard let loginUrl = TidalAuth.shared.initializeLogin(
             redirectUri: Auth._REDIRECT_URI,
             loginConfig: Auth._LOGIN_CONFIG),
               let responseUrl: String = await withCheckedContinuation({ continuation in
@@ -109,17 +86,18 @@ class Auth: ObservableObject {
             webAuthSession.prefersEphemeralWebBrowserSession = false
             webAuthSession.start()
         }),
-              let _ = try? await auth.finalizeLogin(loginResponseUri: responseUrl)
+              let _ = try? await TidalAuth.shared.finalizeLogin(loginResponseUri: responseUrl)
         else {
             return nil
         }
 
-        let authInfo = TidalAuthInfo(auth: auth, eventSender: eventSender)
-        self.state   = .loggedIn(authInfo)
+        self.state = .loggedIn
         return ()
     }
 
-    public func logout() {
+    public func logout() -> ()? {
+        guard let _ = try? TidalAuth.shared.logout() else { return nil }
         state = .idle
+        return ()
     }
 }

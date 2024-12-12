@@ -8,6 +8,8 @@
 import AVFAudio
 import Player
 import QuartzCore
+import EventProducer
+import Auth
 
 struct PlayerInfo {
     var trackId : String
@@ -34,12 +36,12 @@ class TrackPlayer: ObservableObject {
 
     private func _startPlayer(_ trackId: String) -> ()? {
         if _player == nil {
-            guard case .loggedIn(let info) = Auth.shared.state else { return nil }
+            guard case .loggedIn = Auth.shared.state else { return nil }
 
             _player = Player.bootstrap(
-                playerListener     : self     ,
-                credentialsProvider: info.auth,
-                eventSender        : info.eventSender
+                playerListener     : self                   ,
+                credentialsProvider: TidalAuth       .shared,
+                eventSender        : TidalEventSender.shared
             )
         }
 
