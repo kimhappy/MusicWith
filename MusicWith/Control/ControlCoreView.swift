@@ -1,23 +1,21 @@
-//
-//  ControlCoreView.swift
-//  MusicWith
-//
-//  Created by kimhappy on 10/29/24.
-//
-
 import SwiftUI
 
 struct ControlCoreView: View {
-    @StateObject var controlState = ControlState.shared
-    @State       var songName     = ""
-    @State       var songArtist   = ""
-    @State       var songImageUrl = ""
-    @Environment(\.colorScheme) var colorSchema
+    @Environment(\.colorScheme) private var _colorSchema
 
-    var body: some View {
-        if let state = controlState.playState {
+    @StateObject private var _tps           = TrackPlayer.shared
+    @State       private var _trackName     = ""
+    @State       private var _trackArtist   = ""
+    @State       private var _trackImageUrl = ""
+    @State       private var _isDragging    = false
+    @State       private var _sliderValue   = 0.0
+
+    public var body: some View {
+        if let info = _tps.info() {
+            let iconName = if case .playing = _tps.state { "pause" } else { "play" }
+
             HStack {
-                AsyncImage(url: URL(string: songImageUrl)) { image in
+                AsyncImage(url: URL(string: _trackImageUrl)) { image in
                     image
                         .resizable()
                         .frame(width: 50, height: 50)
@@ -26,71 +24,78 @@ struct ControlCoreView: View {
                         .frame(width: 50, height: 50)
                 }
                 VStack(alignment: .leading) {
-                    CustomScrollText(text: songName, font: UIFont.preferredFont(forTextStyle: .headline))
+                    CustomScrollText(text: _trackName, font: UIFont.preferredFont(forTextStyle: .headline))
                         .frame(width : 100)
                         .font(.headline)
-                    CustomScrollText(text: songArtist, font: UIFont.preferredFont(forTextStyle: .headline))
+                    CustomScrollText(text: _trackArtist, font: UIFont.preferredFont(forTextStyle: .headline))
                         .frame(width : 100)
                         .font(.subheadline)
                 }
                 VStack(alignment: .center) {
                     HStack {
                         Button(action : {
-                            Task {await controlState.playPrev() }
+                            _tps.prev()
                         }) {
                             Image(systemName: "backward.fill")
                                 .frame(width: 50, height: 50)
-                                .foregroundStyle(colorSchema == .dark ? .white : .black)
+                                .foregroundStyle(_colorSchema == .dark ? .white : .black)
                         }
                         .padding(.horizontal, 5)
-                        Button(action : controlState.togglePlaying) {
-                            Image(systemName: state.isPlaying ? "pause" : "play")
+                        Button(action: { _tps.toggle() }) {
+                            Image(systemName: iconName)
                                 .frame(width: 50, height: 50)
-                                .foregroundStyle(colorSchema == .dark ? .white : .black)
+                                .foregroundStyle(_colorSchema == .dark ? .white : .black)
                         }
                         .padding(.horizontal, 5)
                         Button(action : {
-                            Task {await controlState.playNext()}
+                            _tps.next()
                         }) {
                             Image(systemName: "forward.fill")
                                 .frame(width: 50, height: 50)
-                                .foregroundStyle(colorSchema == .dark ? .white : .black)
+                                .foregroundStyle(_colorSchema == .dark ? .white : .black)
                         }
                         .padding(.horizontal, 5)
                     }
                     .padding(.top, 80)
 
-                    Slider(value: Binding(get: { state.now }, set: { newNow in
-                        state.now = newNow
+                    Slider(
+                        value: Binding(
+                            get: {
+                                _isDragging ? _sliderValue : info.now
+                            },
+                            set: { newValue in
+                                _sliderValue = newValue
 
-                        if !controlState.isDragging {
-                            controlState.seek(newNow)
-                        }
-                    }),
-                           
-                    in: 0...state.duration,
-                    onEditingChanged: { isEditing in
-                        controlState.isDragging = isEditing
+                                if !_isDragging {
+                                    _tps.seek(newValue)
+                                }
+                            }
+                        ),
+                        in: 0...info.duration,
+                        onEditingChanged: { isEditing in
+                            _isDragging = isEditing
 
-                        if !isEditing {
-                            controlState.seek(state.now)
+                            if !isEditing {
+                                _tps.seek(_sliderValue)
+                            }
                         }
-                    })
-                    .accentColor(.black)
+                    )
+                    .tint(.black)
+
                     HStack {
-                        Text(formatTime(controlState.playState?.now ?? 0.0))
+                        Text(timeFormat(lround(_isDragging ? _sliderValue : info.now)))
                             .font(.caption)
                         Spacer()
-                        Text(formatTime(controlState.playState?.duration ?? 0.0))
+                        Text(timeFormat(lround(info.duration)))
                             .font(.caption)
                     }
                     .padding(.bottom, 50)
                 }
             }
-            .task {
-                songName     = await state.song.name    () ?? ""
-                songArtist   = await state.song.artist  () ?? ""
-                songImageUrl = await state.song.imageUrl() ?? ""
+            .task(id: info.trackId) {
+                _trackName     = await Track.name    (info.trackId) ?? ""
+                _trackArtist   = await Track.artist  (info.trackId) ?? ""
+                _trackImageUrl = await Track.imageUrl(info.trackId) ?? ""
             }
             .padding()
         }
@@ -98,15 +103,4 @@ struct ControlCoreView: View {
             EmptyView()
         }
     }
-    
-    func formatTime(_ time : Double) -> String {
-        let minutes = Int(time) / 60
-        let seconds = Int(time) % 60
-        
-        return String(format : "%02d:%02d", minutes, seconds)
-    }
-}
-
-#Preview {
-    MainView()
 }

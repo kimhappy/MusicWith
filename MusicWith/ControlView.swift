@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct ControlView: View {
-    @State       var selection = 0
-    @StateObject var controlState = ControlState.shared
-    
-    var body: some View {
-        if controlState.sheetHeight == .mini {
+    @State       private var _selection = 0
+    @StateObject private var _cvss      = ControlViewState.shared
+
+    public var body: some View {
+        if case .mini = _cvss.sheetHeight {
             VStack(spacing: 0) {
                 ControlCoreView()
                 Spacer()
@@ -21,7 +21,7 @@ struct ControlView: View {
         else {
             VStack(spacing: 0) {
                 ControlCoreView()
-                CustomTabView(isTop: false, selection: $selection, tabCount: 2) {
+                CustomTabView(isTop: false, selection: $_selection, tabCount: 2) {
                     LyricsView()
                         .tag(0)
                     ChatView()
@@ -31,8 +31,4 @@ struct ControlView: View {
             }
         }
     }
-}
-
-#Preview {
-    MainView()
 }

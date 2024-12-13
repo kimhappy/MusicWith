@@ -7,7 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A522654E2CF49587009B7A63 /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A522654D2CF49587009B7A63 /* KeychainSwift */; };
+		A5BD33BF2CFECE12007679BF /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = A5BD33BE2CFECE12007679BF /* Auth */; };
+		A5BD33C12CFECE12007679BF /* Common in Frameworks */ = {isa = PBXBuildFile; productRef = A5BD33C02CFECE12007679BF /* Common */; };
+		A5BD33C32CFECE12007679BF /* EventProducer in Frameworks */ = {isa = PBXBuildFile; productRef = A5BD33C22CFECE12007679BF /* EventProducer */; };
+		A5BD33C52CFECE12007679BF /* Player in Frameworks */ = {isa = PBXBuildFile; productRef = A5BD33C42CFECE12007679BF /* Player */; };
+		A5BD33C72CFECE12007679BF /* TidalAPI in Frameworks */ = {isa = PBXBuildFile; productRef = A5BD33C62CFECE12007679BF /* TidalAPI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,7 +44,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A522654E2CF49587009B7A63 /* KeychainSwift in Frameworks */,
+				A5BD33C52CFECE12007679BF /* Player in Frameworks */,
+				A5BD33BF2CFECE12007679BF /* Auth in Frameworks */,
+				A5BD33C12CFECE12007679BF /* Common in Frameworks */,
+				A5BD33C72CFECE12007679BF /* TidalAPI in Frameworks */,
+				A5BD33C32CFECE12007679BF /* EventProducer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,7 +91,11 @@
 			);
 			name = MusicWith;
 			packageProductDependencies = (
-				A522654D2CF49587009B7A63 /* KeychainSwift */,
+				A5BD33BE2CFECE12007679BF /* Auth */,
+				A5BD33C02CFECE12007679BF /* Common */,
+				A5BD33C22CFECE12007679BF /* EventProducer */,
+				A5BD33C42CFECE12007679BF /* Player */,
+				A5BD33C62CFECE12007679BF /* TidalAPI */,
 			);
 			productName = MusicWith;
 			productReference = A510DA392CD0ADCD008048F2 /* MusicWith.app */;
@@ -114,7 +126,7 @@
 			mainGroup = A510DA302CD0ADCD008048F2;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				A522654C2CF49587009B7A63 /* XCRemoteSwiftPackageReference "keychain-swift" */,
+				A5BD33BD2CFECE12007679BF /* XCRemoteSwiftPackageReference "tidal-sdk-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A510DA3A2CD0ADCD008048F2 /* Products */;
@@ -289,9 +301,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kimhappy.musicwith;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -318,9 +334,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kimhappy.musicwith;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -348,21 +368,41 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		A522654C2CF49587009B7A63 /* XCRemoteSwiftPackageReference "keychain-swift" */ = {
+		A5BD33BD2CFECE12007679BF /* XCRemoteSwiftPackageReference "tidal-sdk-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/evgenyneu/keychain-swift";
+			repositoryURL = "https://github.com/tidal-music/tidal-sdk-ios";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 24.0.0;
+				minimumVersion = 0.3.47;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		A522654D2CF49587009B7A63 /* KeychainSwift */ = {
+		A5BD33BE2CFECE12007679BF /* Auth */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = A522654C2CF49587009B7A63 /* XCRemoteSwiftPackageReference "keychain-swift" */;
-			productName = KeychainSwift;
+			package = A5BD33BD2CFECE12007679BF /* XCRemoteSwiftPackageReference "tidal-sdk-ios" */;
+			productName = Auth;
+		};
+		A5BD33C02CFECE12007679BF /* Common */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5BD33BD2CFECE12007679BF /* XCRemoteSwiftPackageReference "tidal-sdk-ios" */;
+			productName = Common;
+		};
+		A5BD33C22CFECE12007679BF /* EventProducer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5BD33BD2CFECE12007679BF /* XCRemoteSwiftPackageReference "tidal-sdk-ios" */;
+			productName = EventProducer;
+		};
+		A5BD33C42CFECE12007679BF /* Player */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5BD33BD2CFECE12007679BF /* XCRemoteSwiftPackageReference "tidal-sdk-ios" */;
+			productName = Player;
+		};
+		A5BD33C62CFECE12007679BF /* TidalAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5BD33BD2CFECE12007679BF /* XCRemoteSwiftPackageReference "tidal-sdk-ios" */;
+			productName = TidalAPI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

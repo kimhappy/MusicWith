@@ -8,91 +8,88 @@
 import SwiftUI
 
 struct SearchView: View {
-    @State               var spotifySearch   : SpotifySearch?
-    @State               var searchedSongList: [SpotifyTrack] = []
-    @State       private var isSearched      : Bool           = false // isSearched
-    @State       private var searchText      : String         = ""    // 검색할 String
-    @State       private var searchNum       : Int            = 0     // Search Index 용도, 변화 X
-    @State               var recentSearchList                 = RecentSearch().myRecentSearches()
-    @StateObject private var recentSearch                     = RecentSearch()
-    @StateObject         var controlState                     = ControlState.shared
+    @State       private var _isSearched                      = false
+    @State       private var _query                           = ""
+    @State       private var _searchResults: [String]         = [] // trackId
+    @State       private var _names        : [String: String] = [:]
+    @State       private var _imageUrls    : [String: String] = [:]
+    @StateObject private var _rss                             = RecentSearch.shared
 
-    var body: some View {
+    public var body: some View {
         VStack {
             Text("음악 검색")
-                .font(.title)
+                .font   (.title)
                 .padding(.top, 20)
 
-            TextField("Search :", text: $searchText)
-                .padding(7)
-                .padding(.horizontal, 25)
-                .background(Color(.systemGray6))
+            TextField("Search:", text: $_query)
+                .padding     (7)
+                .padding     (.horizontal, 25)
+                .background  (Color(.systemGray6))
                 .cornerRadius(8)
                 .overlay(
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.gray)
-                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-                            .padding(.leading, 8)
+                            .frame          (minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                            .padding        (.leading, 8)
 
-                        if !searchText.isEmpty {
+                        if !_query.isEmpty {
                             Button(action: {
-                                deleteSearch()
+                                _isSearched = false
+                                _query      = ""
                             }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(.gray)
-                                    .padding(.trailing, 8)
+                                    .padding        (.trailing, 8)
                             }
                         }
-
                     }
                 )
                 .padding(.horizontal, 10)
                 .onSubmit {
-                    Task {
-                        if !searchText.isEmpty {
-                            await sendSearch()
+                    if !_query.isEmpty {
+                        Task {
+                            if let sr = await Search.tracks(_query) {
+                                _rss.addRecentSearch(_query)
+                                _searchResults = sr
+                                _isSearched    = true
+                            }
                         }
                     }
                 }
-                .onChange(of: searchText) {
-                    if searchText == "" {
-                        isSearched = false
-                    }
-                }
 
-            if isSearched {
+            if _isSearched {
                 ScrollView {
                     LazyVStack {
-                        ForEach(searchedSongList, id: \.trackId) { song in
+                        ForEach(1..<_searchResults.count, id: \.self) { index in
                             HStack {
-                                AsyncImage(url: URL(string: song.imageURL ?? "")) { image in
+                                AsyncImage(url: URL(string: _imageUrls[ _searchResults[ index ] ] ?? "https://placehold.co/80")) { image in
                                     image
-                                        .resizable()
+                                        .resizable  ()
                                         .aspectRatio(contentMode: .fill)
-                                        .frame(width: 50, height: 50)
-                                        .clipped()
+                                        .frame      (width: 50, height: 50)
+                                        .clipped    ()
                                 } placeholder: {
                                     ProgressView()
                                         .frame(width: 50, height: 50)
                                 }
-                                CustomScrollText(text: song.title ?? "None")
+                                CustomScrollText(text: _names[ _searchResults[ index ] ] ?? "")
                                     .padding(.leading, 20)
                                 Spacer()
                             }
                             .padding(.vertical, 5)
                             .onTapGesture {
-                                Task {
-                                    await controlState.setSong(song: song)
-                                }
+                                TrackPlayer     .shared.setTrack(_searchResults, index)
+                                ControlViewState.shared.showSheet = true
                             }
-                            .onAppear {
-                                Task {
-                                    // 무한 스크롤 구현 용도, 마지막 것이 출력되면 data 추가 요청
-                                    let lastIndex = searchedSongList.count - 1
+                            .task {
+                                if case nil = _names[ _searchResults[ index ] ] {
+                                    let name     = await Track.name    (_searchResults[ index ])
+                                    let imageUrl = await Track.imageUrl(_searchResults[ index ])
 
-                                    if song.trackId == searchedSongList[lastIndex].trackId {
-                                        searchedSongList = await spotifySearch?.track(idx: searchNum) ?? []
+                                    DispatchQueue.main.async {
+                                        _names    [ _searchResults[ index ] ] = name
+                                        _imageUrls[ _searchResults[ index ] ] = imageUrl
                                     }
                                 }
                             }
@@ -101,28 +98,33 @@ struct SearchView: View {
                 }
                 .padding(.horizontal)
             }
-
             else {
                 ScrollView {
                     LazyVStack(alignment: .leading) {
-                        ForEach(recentSearchList, id: \.self) { term in
+                        ForEach(_rss.myRecentSearches(), id: \.self) { term in
                             HStack {
                                 Text(term)
                                     .padding(.vertical, 8)
                                 Spacer()
                                 Button(action: {
-                                    deleteRecent(term)
+                                    _rss.deleteRecentSearch(term)
                                 }) {
                                     Image(systemName: "trash")
                                         .foregroundColor(.red)
                                 }
                             }
-                            .padding(.horizontal)
-                            .background(Color(.systemBackground))
+                            .padding     (.horizontal)
+                            .background  (Color(.systemBackground))
                             .cornerRadius(8)
                             .onTapGesture {
+                                _query = term
+
                                 Task {
-                                    await tapRecent(term)
+                                    if let sr = await Search.tracks(_query) {
+                                        _rss.addRecentSearch(_query)
+                                        _searchResults = sr
+                                        _isSearched    = true
+                                    }
                                 }
                             }
                             Divider()
@@ -134,37 +136,4 @@ struct SearchView: View {
             }
         }
     }
-
-    private func deleteSearch() {
-        searchText       = ""
-        isSearched       = false
-        spotifySearch    = nil
-        searchedSongList = []
-    }
-
-    private func sendSearch() async {
-        // TODO: Implement Search and get Playlists
-        spotifySearch           = SpotifySearch(query: searchText)
-        searchedSongList        = []
-        guard let searchSuccess = spotifySearch else {return }
-
-        searchedSongList = await searchSuccess.track(idx: searchNum)
-        recentSearch.addRecentSearch(searchText)
-        recentSearchList = recentSearch.myRecentSearches()
-        isSearched = true
-    }
-
-    private func tapRecent(_ term : String) async{
-        searchText = term
-        await sendSearch()
-    }
-
-    private func deleteRecent(_ term : String) {
-        recentSearch.deleteRecentSearch(term)
-        recentSearchList = recentSearch.myRecentSearches()
-    }
-}
-
-#Preview {
-    MainView()
 }
