@@ -126,7 +126,7 @@ struct Track {
 //            }
 //        }
 
-        _storage[ id ]!.lyrics = [Lyric(begin: 0, content: "TEST LYRIC: \(id)"), Lyric(begin: 5, content: "TEST2"), Lyric(begin: 10, content: "TEST3")]
+        _storage[ id ]!.lyrics = [Lyric(begin: 0, content: "TEST LYRIC: \(id)"), Lyric(begin: 1000, content: "TEST2 for 1s"), Lyric(begin: 2000, content: "TEST3 for 2s"), Lyric(begin: 3000, content: "TEST4 for 3s"), Lyric(begin: 4000, content: "TEST5 for 4s"), Lyric(begin: 8000, content: "TEST6 for 8s"), Lyric(begin: 10000, content: "TEST7 for 10s")]
 
         return _storage[ id ]!.lyrics
     }

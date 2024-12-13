@@ -21,12 +21,12 @@ struct LyricsView: View {
                 ForEach(0..<_lyrics.count, id: \.self) { index in
                     if _lyrics.count-1 == index {
                         Text(_lyrics[index].content)
-                            .foregroundColor(_lyrics[index].begin<=_tps.info()!.now ? .blue : colorSchema == .dark ? .white : .black)
+                            .foregroundColor(_lyrics[index].begin/1000<=_tps.info()!.now ? .blue : colorSchema == .dark ? .white : .black)
                             .padding()
                     }
                     else {
                         Text(_lyrics[index].content)
-                            .foregroundColor(_lyrics[index].begin<=_tps.info()!.now && _tps.info()!.now < _lyrics[index+1].begin ? .blue : colorSchema == .dark ? .white : .black)
+                            .foregroundColor(_lyrics[index].begin/1000<=_tps.info()!.now && _tps.info()!.now < _lyrics[index+1].begin/1000 ? .blue : colorSchema == .dark ? .white : .black)
                             .padding()
                     }
                 }
