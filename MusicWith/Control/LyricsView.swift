@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct LyricsView: View {
-    @StateObject private var _tps    = TrackPlayer.shared
-    @State       private var _lyrics = ""
+    @StateObject        private var _tps    = TrackPlayer.shared
+    @State              private var _lyrics: [Lyric] = []
+    @Environment(\.colorScheme) var colorSchema
 
     public var body: some View {
         VStack {
@@ -17,16 +18,25 @@ struct LyricsView: View {
                 .padding(.top, 30)
                 .font(.system(size: 20, weight: .semibold))
             ScrollView {
-                Text(_lyrics)
-                    .lineSpacing(30)
-                    .offset(y: 30)
-                    .padding(30)
+                ForEach(0..<_lyrics.count, id: \.self) { index in
+                    if _lyrics.count-1 == index {
+                        Text(_lyrics[index].content)
+                            .foregroundColor(_lyrics[index].begin/1000<=_tps.info()!.now ? .blue : colorSchema == .dark ? .white : .black)
+                            .padding()
+                    }
+                    else {
+                        Text(_lyrics[index].content)
+                            .foregroundColor(_lyrics[index].begin/1000<=_tps.info()!.now && _tps.info()!.now < _lyrics[index+1].begin/1000 ? .blue : colorSchema == .dark ? .white : .black)
+                            .padding()
+                    }
+                }
             }
         }
         .task(id: _tps.info()!.trackId) {
             let trackId = _tps.info()!.trackId
             let lyrics  = await Track.lyrics(trackId) ?? []
-            _lyrics = lyrics.map(\.content).joined(separator: "\n")
+            _lyrics = lyrics
+            //_lyrics = lyrics.map(\.content).joined(separator: "\n")
         }
     }
 }
