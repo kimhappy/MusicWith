@@ -19,14 +19,9 @@ private struct _MessageView: View {
 
     public var body: some View {
         HStack {
-            Image(systemName: "circle.fill")
-                .resizable      ()
-                .scaledToFill   ()
-                .frame          (width: 40, height: 40)
-                .clipShape      (Circle())
-                .foregroundColor(chat.parentId == nil ? .pink : .green)
-                .padding        ()
-                .padding        (.leading, 4 + indent)
+            Text("")
+                .padding()
+                .padding(.leading, 4 + indent)
 
             VStack(alignment: .leading, spacing: 5) {
                 HStack {
