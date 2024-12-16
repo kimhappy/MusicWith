@@ -28,6 +28,26 @@ class ChatState: ObservableObject {
         case join  (_AJoin  )
         case chat  (_AChat  )
         case delete(_ADelete)
+
+        enum CodingKeys: String, CodingKey {
+            case join
+            case chat
+            case delete
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            switch self {
+            case .join(let value):
+                try container.encode(value, forKey: .join)
+
+            case .chat(let value):
+                try container.encode(value, forKey: .chat)
+
+            case .delete(let value):
+                try container.encode(value, forKey: .delete)
+            }
+        }
     }
 
     // Server -> Client messages
@@ -63,6 +83,41 @@ class ChatState: ObservableObject {
         case leave      (_BLeave     )
         case chat       (_BChat      )
         case delete     (_BDelete    )
+
+        enum CodingKeys: String, CodingKey {
+            case join
+            case join_result
+            case leave
+            case chat
+            case delete
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            if let value = try? container.decode(_BJoin.self, forKey: .join) {
+                self = .join(value)
+            }
+            else if let value = try? container.decode(_BJoinResult.self, forKey: .join_result) {
+                self = .join_result(value)
+            }
+            else if let value = try? container.decode(_BLeave.self, forKey: .leave) {
+                self = .leave(value)
+            }
+            else if let value = try? container.decode(_BChat.self, forKey: .chat) {
+                self = .chat(value)
+            }
+            else if let value = try? container.decode(_BDelete.self, forKey: .delete) {
+                self = .delete(value)
+            }
+            else {
+                throw DecodingError.dataCorrupted(
+                    DecodingError.Context(
+                        codingPath: container.codingPath,
+                        debugDescription: "No valid key found for _BMsg."
+                    )
+                )
+            }
+        }
     }
 
     static public var shared = ChatState()

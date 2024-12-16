@@ -89,12 +89,21 @@ class TrackPlayer: ObservableObject {
     public func setTrack(_ trackIds: [String], _ index: Int) -> ()? {
         _stopDisplayLink()
         _stopPlayer()
+        ChatState.shared.disconnect()
         _trackIds = trackIds
         _index    = index
         state = PlayerState.paused(PlayerInfo(trackId: _trackIds[ _index ], duration: 0, now: 0))
         _startPlayer(_trackIds[ _index ])!
         play()!
         ChatState.shared.connect(trackId: _trackIds[ _index ])
+
+        Task {
+            if let myUserId = await Auth.shared.state.myUserId(),
+               let myName   = await User.name(myUserId) {
+                ChatState.shared.sendJoin(userId: myUserId, name: myName)
+            }
+        }
+
         return ()
     }
 
