@@ -5,13 +5,11 @@
 //  Created by 2020014975 on 11/3/24.
 //
 
-import SwiftUI
-import Combine
-
-struct Chat: Identifiable, Equatable {
-    public var id      : String
-    public var user    : String  // sending user
-    public var text    : String? // text
-    public var timeSong: Int?    // chatted playtime of the song
-    public var parentId: String?
+struct Chat {
+    public var userId : String
+    public var name   : String
+    public var chatId : String
+    public var content: String?
+    public var time   : Double?
+    public var replyTo: String?
 }

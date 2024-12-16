@@ -94,6 +94,7 @@ class TrackPlayer: ObservableObject {
         state = PlayerState.paused(PlayerInfo(trackId: _trackIds[ _index ], duration: 0, now: 0))
         _startPlayer(_trackIds[ _index ])!
         play()!
+        ChatState.shared.connect(trackId: _trackIds[ _index ])
         return ()
     }
 
@@ -169,6 +170,7 @@ class TrackPlayer: ObservableObject {
     deinit {
         _stopPlayer()
         _stopDisplayLink()
+        ChatState.shared.disconnect()
     }
 }
 

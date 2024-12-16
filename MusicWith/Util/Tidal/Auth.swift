@@ -22,6 +22,16 @@ enum AuthState {
             return try? await TidalAuth.shared.getCredentials().token
         }
     }
+
+    public func myUserId() async -> String? {
+        switch self {
+        case .idle:
+            return nil
+
+        case .loggedIn:
+            return try? await TidalAuth.shared.getCredentials().userId
+        }
+    }
 }
 
 class Auth: ObservableObject {
