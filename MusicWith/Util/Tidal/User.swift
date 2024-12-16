@@ -20,7 +20,9 @@ struct User {
         guard let json       = await Query.getTidalJson("/users/\(id)") as? [String: Any],
               let data       = json      [ "data"       ]               as? [String: Any],
               let attributes = data      [ "attributes" ]               as? [String: Any],
-              let name       = attributes[ "firstName"  ]               as?  String
+              let name       = attributes[ "firstName"  ]               as?  String ??
+                               attributes[ "lastName"   ]               as?  String ??
+                               attributes[ "username"   ]               as?  String
         else {
             return nil
         }
