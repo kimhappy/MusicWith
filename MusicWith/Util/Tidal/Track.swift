@@ -114,7 +114,7 @@ struct Track {
         else {
             return nil
         }
-        
+
         _storage[ id ]!.lyrics = json.mapOptional {
             switch ($0[ "begin" ] as? Double, $0[ "content" ] as? String) {
             case (.some(let begin), .some(let content)):
@@ -124,7 +124,7 @@ struct Track {
                 return nil
             }
         }
-        
+
         return _storage[ id ]!.lyrics
     }
 }

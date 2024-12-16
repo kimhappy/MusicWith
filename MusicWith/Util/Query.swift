@@ -26,7 +26,7 @@ class Query {
     }
 
     static public func getMwJson(_ link: String) async -> Any? {
-        guard let url = URL(string: "http://localhost:8000" + link)
+        guard let url = URL(string: "http://34.122.154.52:8000" + link)
         else {
             return nil
         }

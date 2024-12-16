@@ -207,7 +207,7 @@ class ChatState: ObservableObject {
     }
 
     public func connect(trackId: String) {
-        guard let url  = URL(string: "ws://127.0.0.1:8000/chat/\(trackId)") else { return }
+        guard let url  = URL(string: "ws://34.122.154.52:8000/chat/\(trackId)") else { return }
         let request    = URLRequest(url: url)
         _webSocketTask = URLSession.shared.webSocketTask(with: request)
         _webSocketTask?.resume()
