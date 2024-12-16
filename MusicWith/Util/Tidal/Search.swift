@@ -10,8 +10,8 @@ import Foundation
 struct Search {
     public static func tracks(_ query: String) async -> [String]? {
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let json         = await Query.getTidalJson("/searchresults/\(encodedQuery)/relationships/tracks?countryCode=KR&include=tracks.albums,tracks.artists"),
-              let included     = json[ "included" ] as? [[String: Any]]
+              let json         = await Query.getTidalJson("/searchresults/\(encodedQuery)/relationships/tracks?countryCode=KR&include=tracks.albums,tracks.artists") as?  [String: Any],
+              let included     = json[ "included" ]                                                                                                                  as? [[String: Any]]
         else {
             return nil
         }

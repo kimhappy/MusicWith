@@ -21,17 +21,17 @@ struct Track {
             return ret
         }
 
-        guard let json       = await Query.getTidalJson("/tracks/\(id)?countryCode=KR&include=artists,albums"),
-              let data       = json            [ "data"       ] as?  [String: Any] ,
-              let included   = json            [ "included"   ] as? [[String: Any]],
-              let attributes = data            [ "attributes" ] as?  [String: Any] ,
-              let name       = attributes      [ "title"      ] as?   String       ,
-              let isrc       = attributes      [ "isrc"       ] as?   String       ,
-              let artistAttr = included.first(where: { $0[ "type" ] as? String == "artists" })?[ "attributes" ] as? [String: Any],
-              let albumAttr  = included.first(where: { $0[ "type" ] as? String == "albums"  })?[ "attributes" ] as? [String: Any],
-              let artist     = artistAttr      [ "name"       ] as?   String       ,
-              let imageLinks = albumAttr       [ "imageLinks" ] as? [[String: Any]],
-              let imageUrl   = imageLinks.last?[ "href"       ] as?   String
+        guard let json       = await Query.getTidalJson("/tracks/\(id)?countryCode=KR&include=artists,albums")  as?  [String: Any] ,
+              let data       = json            [ "data"       ]                                                 as?  [String: Any] ,
+              let included   = json            [ "included"   ]                                                 as? [[String: Any]],
+              let attributes = data            [ "attributes" ]                                                 as?  [String: Any] ,
+              let name       = attributes      [ "title"      ]                                                 as?   String       ,
+              let isrc       = attributes      [ "isrc"       ]                                                 as?   String       ,
+              let artistAttr = included.first(where: { $0[ "type" ] as? String == "artists" })?[ "attributes" ] as?  [String: Any] ,
+              let albumAttr  = included.first(where: { $0[ "type" ] as? String == "albums"  })?[ "attributes" ] as?  [String: Any] ,
+              let artist     = artistAttr      [ "name"       ]                                                 as?   String       ,
+              let imageLinks = albumAttr       [ "imageLinks" ]                                                 as? [[String: Any]],
+              let imageUrl   = imageLinks.last?[ "href"       ]                                                 as?   String
         else {
             return nil
         }
@@ -110,7 +110,7 @@ struct Track {
         }
 
         guard let trackIsrc = await isrc(id),
-              let json      = await Query.getMwJson("/lyrics?isrc=\(trackIsrc)")
+              let json      = await Query.getMwJson("/lyrics?isrc=\(trackIsrc)") as? [[String: Any]]
         else {
             return nil
         }
