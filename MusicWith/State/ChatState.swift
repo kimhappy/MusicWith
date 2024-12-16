@@ -5,7 +5,7 @@
 //  Created by kimhappy on 12/16/24.
 //
 
-import SwiftUI
+import Foundation
 
 class ChatState: ObservableObject {
     // Client -> Server messages
