@@ -86,10 +86,14 @@ class TrackPlayer: ObservableObject {
         }
     }
 
-    public func setTrack(_ trackIds: [String], _ index: Int) -> ()? {
+    public func stop() {
         _stopDisplayLink()
         _stopPlayer()
         ChatState.shared.disconnect()
+    }
+
+    public func setTrack(_ trackIds: [String], _ index: Int) -> ()? {
+        stop()
         _trackIds = trackIds
         _index    = index
         state = PlayerState.paused(PlayerInfo(trackId: _trackIds[ _index ], duration: 0, now: 0))
@@ -177,9 +181,7 @@ class TrackPlayer: ObservableObject {
     }
 
     deinit {
-        _stopPlayer()
-        _stopDisplayLink()
-        ChatState.shared.disconnect()
+        stop()
     }
 }
 
