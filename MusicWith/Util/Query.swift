@@ -10,9 +10,12 @@ import Foundation
 class Query {
     private init() {}
 
+    static public let TIDAL_ADDRESS = "openapi.tidal.com/v2"
+    static public let MW_ADDRESS    = "34.122.154.52:8000"
+
     static public func getTidalJson(_ link: String) async -> Any? {
         guard let token = await Auth.shared.state.token(),
-              let url   = URL(string: "https://openapi.tidal.com/v2" + link)
+              let url   = URL(string: "https://\(TIDAL_ADDRESS)\(link)")
         else {
             return nil
         }
@@ -26,7 +29,7 @@ class Query {
     }
 
     static public func getMwJson(_ link: String) async -> Any? {
-        guard let url = URL(string: "http://34.122.154.52:8000" + link)
+        guard let url = URL(string: "http://\(MW_ADDRESS)\(link)")
         else {
             return nil
         }
