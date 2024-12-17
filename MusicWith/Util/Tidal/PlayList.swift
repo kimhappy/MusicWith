@@ -16,9 +16,9 @@ struct PlayList {
     public var trackIds: [String]
 
     public static func myPlayListIds() async -> [String]? {
-        guard let json     = await Query.getTidalJson("/playlists/me?include=items.albums,items.artists"),
-              let data     = json[ "data"     ] as? [[String: Any]],
-              let included = json[ "included" ] as? [[String: Any]]
+        guard let json     = await Query.getTidalJson("/playlists/me?include=items.albums,items.artists") as?  [String: Any] ,
+              let data     = json[ "data"     ]                                                           as? [[String: Any]],
+              let included = json[ "included" ]                                                           as? [[String: Any]]
         else {
             return nil
         }
@@ -101,13 +101,13 @@ struct PlayList {
             return ret
         }
 
-        guard let json       = await Query.getTidalJson("/playlists/\(id)?countryCode=KR&include=items"),
-              let data       = json             [ "data"       ] as?  [String: Any] ,
-              let included   = json             [ "included"   ] as? [[String: Any]],
-              let attributes = data             [ "attributes" ] as?  [String: Any] ,
-              let name       = attributes       [ "name"       ] as?   String       ,
-              let imageLinks = attributes       [ "imageLinks" ] as? [[String: Any]],
-              let imageUrl   = imageLinks.first?[ "href"       ] as?   String
+        guard let json       = await Query.getTidalJson("/playlists/\(id)?countryCode=KR&include=items") as? [String: Any],
+              let data       = json             [ "data"       ]                                         as?  [String: Any] ,
+              let included   = json             [ "included"   ]                                         as? [[String: Any]],
+              let attributes = data             [ "attributes" ]                                         as?  [String: Any] ,
+              let name       = attributes       [ "name"       ]                                         as?   String       ,
+              let imageLinks = attributes       [ "imageLinks" ]                                         as? [[String: Any]],
+              let imageUrl   = imageLinks.first?[ "href"       ]                                         as?   String
         else {
             return nil
         }

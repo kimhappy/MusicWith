@@ -10,7 +10,7 @@ import Foundation
 class Query {
     private init() {}
 
-    static public func getTidalJson(_ link: String) async -> [String: Any]? {
+    static public func getTidalJson(_ link: String) async -> Any? {
         guard let token = await Auth.shared.state.token(),
               let url   = URL(string: "https://openapi.tidal.com/v2" + link)
         else {
@@ -22,17 +22,17 @@ class Query {
         request.setValue("Bearer \(token)"         , forHTTPHeaderField: "Authorization")
 
         let data = try? await URLSession.shared.data(for: request).0
-        return data.flatMap { try? JSONSerialization.jsonObject(with: $0, options: []) as? [String: Any] }
+        return data.flatMap { try? JSONSerialization.jsonObject(with: $0, options: []) }
     }
 
-    static public func getMwJson(_ link: String) async -> [[String: Any]]? {
-        guard let url = URL(string: "http://localhost:8000" + link)
+    static public func getMwJson(_ link: String) async -> Any? {
+        guard let url = URL(string: "http://34.122.154.52:8000" + link)
         else {
             return nil
         }
 
         let request = URLRequest(url: url)
         let data    = try? await URLSession.shared.data(for: request).0
-        return data.flatMap { try? JSONSerialization.jsonObject(with: $0, options: []) as? [[String: Any]] }
+        return data.flatMap { try? JSONSerialization.jsonObject(with: $0, options: []) }
     }
 }
