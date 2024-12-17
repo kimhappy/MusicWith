@@ -8,14 +8,12 @@
 import SwiftUI
 
 struct PlayListsView: View {
-    @Environment(\.colorScheme) private var _colorSchema
-
     @State private var _userName   :  String          = ""
     @State private var _playListIds: [String]         = []
     @State private var _names      : [String: String] = [:]
     @State private var _imageUrls  : [String: String] = [:]
 
-    @State private var _refresh: Bool = false
+    @Environment(\.colorScheme) private var _colorSchema
 
     var body: some View {
         ZStack {
@@ -62,7 +60,7 @@ struct PlayListsView: View {
                 .padding(.horizontal)
             }
             .task {
-                if let myUserId = await User.myUserId() {
+                if let myUserId = await Auth.shared.state.myUserId() {
                     _userName    = await User    .name         (myUserId) ?? "나"
                     _playListIds = await PlayList.myPlayListIds()         ?? []
                 }

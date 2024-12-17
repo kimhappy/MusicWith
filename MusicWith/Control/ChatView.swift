@@ -6,16 +6,16 @@
 //
 
 import SwiftUI
-import Combine
 
 private struct _MessageView: View {
-    public let chat       : Chat
-    public let myUserId   : String
-    public let activeUsers: [String]
-    public let colorScheme: ColorScheme
-    public let indent     : CGFloat
-    public let onReply    : (String) -> Void
-    public let onDelete   : (String) -> Void
+    @ObservedObject private var _css = ChatState.shared
+
+    @Environment(\.colorScheme) private var _colorSchema
+
+    public let chat    : Chat
+    public let indent  : CGFloat
+    public let onReply :  () -> Void
+    public let onDelete: (() -> Void)?
 
     public var body: some View {
         HStack {
@@ -25,128 +25,124 @@ private struct _MessageView: View {
 
             VStack(alignment: .leading, spacing: 5) {
                 HStack {
-                    Text(chat.user)
+                    Text(chat.name)
                         .font           (.headline)
-                        .foregroundColor(activeUsers.contains(chat.user) ? .red : colorScheme == .dark ? .white : .black)
+                        .foregroundColor(_css.online.contains(chat.userId) ? .red : _colorSchema == .dark ? .white : .black)
                     Spacer()
-                    if let time = chat.timeSong, chat.parentId == nil {
-                        Text(timeFormat(time))
+                    if let time = chat.time, case nil = chat.replyTo {
+                        Text(timeFormat(Int(time)))
                             .font           (.subheadline)
                             .foregroundColor(.blue)
                             .padding        (.trailing, 20)
                     }
                 }
 
-                Text(chat.text ?? "삭제됨")
-                    .font(.title3)
+                Text(chat.content ?? "삭제됨")
+                    .font     (.title3)
                     .fixedSize(horizontal: false, vertical: true)
 
                 HStack {
-                    if chat.parentId == nil {
+                    if case nil = chat.replyTo {
                         Button(action: {
-                            onReply(chat.id)
+                            onReply()
                         }) {
                             Text("답글")
                         }
-                        .font(.subheadline)
+                        .font           (.subheadline)
                         .foregroundColor(.blue)
                     }
 
                     Spacer()
 
-                    if myUserId == chat.user {
+                    if let onDelete {
                         Button(action: {
-                            onDelete(chat.id)
+                            onDelete()
                         }) {
                             Text("삭제")
-                                .font(.subheadline)
+                                .font   (.subheadline)
                                 .padding(.trailing)
                         }
                     }
                 }
             }
-            .padding(.vertical, chat.parentId == nil ? 20 : 10)
+            .padding(.vertical, chat.replyTo == nil ? 20 : 10)
         }
     }
 }
 
-
 struct ChatView: View {
-    @ObservedObject             private var _nss                        = NetworkService.shared
-    @ObservedObject             private var _tps                        = TrackPlayer   .shared
-    @State                      private var _myUserId        : String   = ""
-    @State                      private var _messageText     : String   = ""
-    @State                      private var _isSelected      : Bool     = false
-    @State                      private var _selectedParentId: String?  = nil
-    @State                      private var _isDeleteSelected: Bool     = false
-    @State                      private var _selectedDeleteId: String?  = nil
-    @State                      private var _chats           : [Chat]   = []
-    @State                      private var _activeUser      : [String] = []
+    @ObservedObject private var _css                       = ChatState  .shared
+    @ObservedObject private var _tps                       = TrackPlayer.shared
+    @State          private var _messageText     : String  = ""
+    @State          private var _isSelected      : Bool    = false
+    @State          private var _selectedParent  : Chat?   = nil
+    @State          private var _isDeleteSelected: Bool    = false
+    @State          private var _selectedDelete  : Chat?   = nil
+    @State          private var _myUserId        : String? = nil
+
     @Environment(\.colorScheme) private var _colorSchema
 
     private func _sendMessage() {
-        guard !_messageText.isEmpty else { return }
+        guard !_messageText.isEmpty,
+              let info = _tps.info()
+        else {
+            return
+        }
 
         if _isSelected {
-            _nss.sendChat(content: _messageText, time: nil, reply_to: _selectedParentId)
-            _messageText      = ""
-            _isSelected       = false
-            _selectedParentId = nil
+            _css.sendChat(content: _messageText, replyTo: _selectedParent!.chatId)
+            _messageText    = ""
+            _isSelected     = false
+            _selectedParent = nil
         }
-        else if let info = _tps.info() {
-            _nss.sendChat(content: _messageText, time: Int(info.now), reply_to: nil)
+        else {
+            _css.sendChat(content: _messageText, time: info.now)
             _messageText = ""
         }
     }
 
     private func _deleteMessage() {
-        guard let deleteId = _selectedDeleteId else { return }
-        _nss.askDelete(chatId: deleteId)
+        guard let selectedDeleteId = _selectedDelete?.chatId else { return }
+        _css.sendDelete(chatId: selectedDeleteId)
         _isDeleteSelected = false
-        _selectedDeleteId = nil
+        _selectedDelete   = nil
     }
 
-    private var _parentChats: [Chat] {
-        _chats.filter { $0.parentId == nil }
+    private func _parentChats() -> [Chat] {
+        _css.chat.filter { $0.replyTo == nil }
     }
 
     private func _replies(_ chatId: String) -> [Chat] {
-        _chats.filter { $0.parentId == chatId }
+        _css.chat.filter { $0.replyTo == chatId }
     }
 
     public var body: some View {
         VStack {
             ScrollView {
                 LazyVStack(alignment: .leading) {
-                    ForEach(_parentChats) { chat in
+                    ForEach(_parentChats(), id: \.chatId) { chat in
                         _MessageView(
-                            chat       : chat,
-                            myUserId   : _myUserId,
-                            activeUsers: _activeUser,
-                            colorScheme: _colorSchema,
-                            indent     : 0,
-                            onReply    : { parentId in
-                                _isSelected       = true
-                                _selectedParentId = parentId
+                            chat       : chat        ,
+                            indent     : 0           ,
+                            onReply    : {
+                                _isSelected     = true
+                                _selectedParent = chat
                             },
-                            onDelete   : { chatId in
-                                _selectedDeleteId = chatId
+                            onDelete   : chat.userId == _myUserId ? {
                                 _isDeleteSelected = true
-                            }
+                                _selectedDelete   = chat
+                            } : nil
                         )
 
-                        ForEach(_replies(chat.id)) { replyChat in
+                        ForEach(_replies(chat.chatId), id: \.chatId) { replyChat in
                             _MessageView(
-                                chat       : replyChat,
-                                myUserId   : _myUserId,
-                                activeUsers: _activeUser,
-                                colorScheme: _colorSchema,
-                                indent     : 50,
-                                onReply    : { _ in },
-                                onDelete   : { chatId in
-                                    _selectedDeleteId = chatId
+                                chat       : replyChat   ,
+                                indent     : 50          ,
+                                onReply    : {}          ,
+                                onDelete   : chat.userId == _myUserId ? {
                                     _isDeleteSelected = true
-                                }
+                                    _selectedDelete   = replyChat
+                                } : nil
                             )
                         }
                     }
@@ -154,21 +150,19 @@ struct ChatView: View {
             }
 
             VStack(alignment: .leading, spacing: 10) {
-                if _isSelected, let selectedParentId = _selectedParentId {
+                if _isSelected, let parent = _selectedParent {
                     HStack {
-                        if let parentChat = _chats.first(where: { $0.id == selectedParentId }) {
-                            Text(" \(parentChat.user) 에게 답장 중")
-                                .font           (.body)
-                                .foregroundColor(.blue)
-                                .padding        (.leading, 20)
-                                .padding        (.top, 5)
-                        }
+                        Text(" \(parent.name) 에게 답장 중")
+                            .font           (.body)
+                            .foregroundColor(.blue)
+                            .padding        (.leading, 20)
+                            .padding        (.top, 5)
                         Spacer()
                         Text("취소")
                             .padding(.trailing, 30)
                             .onTapGesture {
-                                _isSelected       = false
-                                _selectedParentId = nil
+                                _isSelected     = false
+                                _selectedParent = nil
                             }
                     }
                     .padding(.vertical, 5)
@@ -204,19 +198,7 @@ struct ChatView: View {
             )
         }
         .task {
-            if let userId = await User.myUserId() {
-                _myUserId = userId
-            }
-        }
-        .task(id: _tps.info()!.trackId) {
-            _nss.disconnect()
-            _chats = []
-            await _nss.connect(trackId: _tps.info()!.trackId, userId: _myUserId, chats: $_chats, activeUser: $_activeUser)
-            _nss.askHistory()
-        }
-        .onDisappear {
-            _nss.disconnect()
-            _chats = []
+            _myUserId = await Auth.shared.state.myUserId()
         }
     }
 }
