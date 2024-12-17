@@ -195,7 +195,6 @@ struct ChatView: View {
                         Text("전송")
                             .font           (.system(size: 20))
                             .padding        (10)
-                            
                             .foregroundColor(.white)
                             .background     (Color.blue)
                             .cornerRadius   (10)
