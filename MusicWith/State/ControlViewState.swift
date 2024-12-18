@@ -15,8 +15,7 @@ class ControlViewState: ObservableObject {
     @Published public var showSheet  : Bool        = false {
         didSet {
             if !showSheet {
-                sheetHeight = .mini
-                TrackPlayer.shared.pause()
+                TrackPlayer.shared.stop()
             }
         }
     }

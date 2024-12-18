@@ -47,21 +47,21 @@ class Auth: ObservableObject {
         credentialsKey : _CREDENTIALS_KEY  ,
         scopes         : _SCOPES
     )
-    static private let _EVENT_CONFIG = EventConfig(
-        credentialsProvider     : TidalAuth.shared,
-        maxDiskUsageBytes       : 1_000_000       ,
-        blockedConsentCategories: []
-    )
     static private let _LOGIN_CONFIG = LoginConfig(customParams: [QueryParameter(key: "appMode", value: "iOS")])
 
     static public var shared = Auth()
 
     private init() {
-        TidalAuth       .shared.config(config: Auth._AUTH_CONFIG )
-        TidalEventSender.shared.config(        Auth._EVENT_CONFIG)
+        TidalAuth.shared.config(config: Auth._AUTH_CONFIG)
 
         if TidalAuth.shared.isUserLoggedIn {
             state = .loggedIn
+
+            TidalEventSender.shared.config(EventConfig(
+                credentialsProvider     : TidalAuth.shared,
+                maxDiskUsageBytes       : 1_000_000       ,
+                blockedConsentCategories: []
+            ))
         }
     }
 
@@ -102,6 +102,11 @@ class Auth: ObservableObject {
         }
 
         self.state = .loggedIn
+        TidalEventSender.shared.config(EventConfig(
+            credentialsProvider     : TidalAuth.shared,
+            maxDiskUsageBytes       : 1_000_000       ,
+            blockedConsentCategories: []
+        ))
         return ()
     }
 

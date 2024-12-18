@@ -64,8 +64,24 @@ private struct _MessageView: View {
                         }
                     }
                 }
+                Divider()
+                    .background(.gray)
+                    .frame(width: 250, height: 1)
+                    .padding(.top, 20)
+                    .mask(
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: .clear, location: 0.0),
+                                .init(color: .black, location: 0.2),
+                                .init(color: .black, location: 0.8),
+                                .init(color: .clear, location: 1.0)
+                            ]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
             }
-            .padding(.vertical, chat.replyTo == nil ? 20 : 10)
+            .padding(.vertical, chat.replyTo == nil ? 10 : 5)
         }
     }
 }
@@ -133,7 +149,6 @@ struct ChatView: View {
                                 _selectedDelete   = chat
                             } : nil
                         )
-
                         ForEach(_replies(chat.chatId), id: \.chatId) { replyChat in
                             _MessageView(
                                 chat       : replyChat   ,
@@ -173,6 +188,7 @@ struct ChatView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .font          (.system(size: 20))
                         .padding       ()
+                        .padding       (.bottom, 20)
                     Button(action: {
                         _sendMessage()
                     }) {
@@ -183,6 +199,7 @@ struct ChatView: View {
                             .background     (Color.blue)
                             .cornerRadius   (10)
                             .offset         (x: -11)
+                            .padding        (.bottom, 20)
                     }
                 }
             }
