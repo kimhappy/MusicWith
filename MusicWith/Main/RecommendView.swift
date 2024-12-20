@@ -40,7 +40,7 @@ struct RecommendView: View {
                                  ProgressView()
                                      .frame(width: 100, height: 100)
                              }
-                             CustomScrollText(text: _names[ _trackIds[ index ] ] ?? "")
+                             CustomScrollText(text: _names[ _trackIds[ index ] ] ?? "", alignment: .center)
                                  .foregroundColor(_colorSchema == .dark ? .white : .black)
 
                              Spacer()
@@ -71,9 +71,7 @@ struct RecommendView: View {
             .padding(.horizontal)
         }
         .task {
-            let playListId = "YJ5EdOPU4PN0IMuCOtQVZF7cSMD89qIwCadcbznxSo9grngXZ4d"
-            _playListName = await PlayList.name    (playListId) ?? ""
-            _trackIds     = await PlayList.trackIds(playListId) ?? []
+            _trackIds     = await RecommendTrack.tracks()
         }
     }
 }
