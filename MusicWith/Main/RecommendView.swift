@@ -11,7 +11,6 @@ import Combine
 struct RecommendView: View {
     @Environment(\.colorScheme) private var _colorSchema
     
-    @State private var _playListName:  String  = ""
     @State private var _trackIds    : [String] = []
     @State private var _names       : [String: String] = [:]
     @State private var _imageUrls   : [String: String] = [:]
