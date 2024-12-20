@@ -35,6 +35,11 @@ struct LyricsView: View {
                             .padding()
                     }
                 }
+                if _lyrics.isEmpty {
+                    Text("가사가 지원되지 않는 트랙입니다.")
+                        .foregroundColor(colorSchema == .dark ? .white: .black)
+                        .padding()
+                }
             }
             .padding(.bottom, 40)
         }
