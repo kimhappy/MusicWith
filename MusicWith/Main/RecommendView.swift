@@ -71,6 +71,15 @@ struct RecommendView: View {
         }
         .task {
             _trackIds     = await RecommendTrack.tracks()
+            for _trackId in _trackIds {
+                let name     = await Track.name    (_trackId)
+                let imageUrl = await Track.imageUrl(_trackId)
+                
+                DispatchQueue.main.async {
+                    _names    [_trackId] = name
+                    _imageUrls[_trackId] = imageUrl
+                }
+            }
         }
     }
 }
