@@ -6,14 +6,13 @@
 //
 
 import SwiftUI
-import Combine
 
 struct RecommendView: View {
     @Environment(\.colorScheme) private var _colorSchema
     
-    @State private var _trackIds    : [String] = []
-    @State private var _names       : [String: String] = [:]
-    @State private var _imageUrls   : [String: String] = [:]
+    @State private var _tracks   : [(String, Int) ] = []
+    @State private var _names    : [String: String] = [:]
+    @State private var _imageUrls: [String: String] = [:]
 
     private let _columns = [
         GridItem(.flexible()),
@@ -27,9 +26,9 @@ struct RecommendView: View {
                 .padding(.top, 20)
              ScrollView {
                  LazyVGrid(columns: _columns, spacing: 16) {
-                     ForEach(0..<_trackIds.count, id: \.self) { index in
+                     ForEach(0..<_tracks.count, id: \.self) { index in
                          VStack {
-                             AsyncImage(url: URL(string: _imageUrls[ _trackIds[ index ] ] ?? "https://placehold.co/80")) { image in
+                             AsyncImage(url: URL(string: _imageUrls[ _tracks[ index ].0 ] ?? "https://placehold.co/80")) { image in
                                  image
                                      .resizable()
                                      .aspectRatio(contentMode: .fill)
@@ -39,7 +38,7 @@ struct RecommendView: View {
                                  ProgressView()
                                      .frame(width: 100, height: 100)
                              }
-                             CustomScrollText(text: _names[ _trackIds[ index ] ] ?? "", alignment: .center)
+                             CustomScrollText(text: _names[ _tracks[ index ].0 ] ?? "", alignment: .center)
                                  .foregroundColor(_colorSchema == .dark ? .white : .black)
 
                              Spacer()
@@ -50,17 +49,17 @@ struct RecommendView: View {
                          .cornerRadius(12)
                          .shadow(radius: 2)
                          .onTapGesture {
-                             TrackPlayer     .shared.setTrack(_trackIds, index)
+                             TrackPlayer     .shared.setTrack(_tracks.map({ $0.0 }), index)
                              ControlViewState.shared.showSheet = true
                          }
                          .task {
-                             if case nil = _names[ _trackIds[ index ] ] {
-                                 let name     = await Track.name    (_trackIds[ index ])
-                                 let imageUrl = await Track.imageUrl(_trackIds[ index ])
+                             if case nil = _names[ _tracks[ index ].0 ] {
+                                 let name     = await Track.name    (_tracks[ index ].0)
+                                 let imageUrl = await Track.imageUrl(_tracks[ index ].0)
 
                                  DispatchQueue.main.async {
-                                     _names    [ _trackIds[ index ] ] = name
-                                     _imageUrls[ _trackIds[ index ] ] = imageUrl
+                                     _names    [ _tracks[ index ].0 ] = name
+                                     _imageUrls[ _tracks[ index ].0 ] = imageUrl
                                  }
                              }
                          }
@@ -70,16 +69,7 @@ struct RecommendView: View {
             .padding(.horizontal)
         }
         .task {
-            _trackIds     = await RecommendTrack.tracks()
-            for _trackId in _trackIds {
-                let name     = await Track.name    (_trackId)
-                let imageUrl = await Track.imageUrl(_trackId)
-                
-                DispatchQueue.main.async {
-                    _names    [_trackId] = name
-                    _imageUrls[_trackId] = imageUrl
-                }
-            }
+            _tracks = await RecommendTrack.tracks() ?? []
         }
     }
 }
