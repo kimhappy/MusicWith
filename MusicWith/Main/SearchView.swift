@@ -26,6 +26,7 @@ struct SearchView: View {
                 .padding     (.horizontal, 25)
                 .background  (Color(.systemGray6))
                 .cornerRadius(8)
+                .submitLabel(.search)
                 .overlay(
                     HStack {
                         Image(systemName: "magnifyingglass")

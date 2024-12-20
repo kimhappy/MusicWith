@@ -5,10 +5,15 @@ class RecentSearch: ObservableObject {
     static private let _DEFAULT_KEY      = "RecentSearches"
 
     static public var shared = RecentSearch()
-    private init() {}
+
+    @Published    var _rssList : [String]
+    
+    private init() {
+        _rssList = UserDefaults.standard.stringArray(forKey: Self._DEFAULT_KEY) ?? []
+    }
 
     public func myRecentSearches() -> [String] {
-        UserDefaults.standard.stringArray(forKey: Self._DEFAULT_KEY) ?? []
+        _rssList
     }
 
     public func addRecentSearch(_ term: String) {
@@ -25,11 +30,13 @@ class RecentSearch: ObservableObject {
         }
 
         UserDefaults.standard.set(searches, forKey: Self._DEFAULT_KEY)
+        _rssList = UserDefaults.standard.stringArray(forKey: Self._DEFAULT_KEY) ?? []
     }
 
     public func deleteRecentSearch(_ term: String) {
         var searches = myRecentSearches()
         searches.removeAll { $0 == term }
         UserDefaults.standard.set(searches, forKey: Self._DEFAULT_KEY)
+        _rssList = UserDefaults.standard.stringArray(forKey: Self._DEFAULT_KEY) ?? []
     }
 }
