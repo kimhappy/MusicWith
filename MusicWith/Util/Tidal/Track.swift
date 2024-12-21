@@ -20,10 +20,12 @@ struct Track {
         if let ret = get(_storage[ id ]) {
             return ret
         }
-
-        guard let json       = await Query.getTidalJson("/tracks/\(id)?countryCode=KR&include=artists,albums")  as?  [String: Any] ,
-              let data       = json            [ "data"       ]                                                 as?  [String: Any] ,
-              let included   = json            [ "included"   ]                                                 as? [[String: Any]],
+        let krUrl = "/tracks/\(id)?countryCode=KR&include=artists,albums"
+        let usUrl = "/tracks/\(id)?countryCode=US&include=artists,albums"
+        
+        guard let krjson       = await Query.getTidalJson(krUrl)  as?  [String: Any] ,
+              let data       = krjson          [ "data"       ]                                                 as?  [String: Any] ,
+              let included   = krjson          [ "included"   ]                                                 as? [[String: Any]],
               let attributes = data            [ "attributes" ]                                                 as?  [String: Any] ,
               let name       = attributes      [ "title"      ]                                                 as?   String       ,
               let isrc       = attributes      [ "isrc"       ]                                                 as?   String       ,
@@ -33,8 +35,33 @@ struct Track {
               let imageLinks = albumAttr       [ "imageLinks" ]                                                 as? [[String: Any]],
               let imageUrl   = imageLinks.last?[ "href"       ]                                                 as?   String
         else {
-            return nil
+            guard   let usjson       = await Query.getTidalJson(usUrl)  as?  [String: Any] ,
+                    let data       = usjson          [ "data"       ]                                                 as?  [String: Any] ,
+                    let included   = usjson          [ "included"   ]                                                 as? [[String: Any]],
+                    let attributes = data            [ "attributes" ]                                                 as?  [String: Any] ,
+                    let name       = attributes      [ "title"      ]                                                 as?   String       ,
+                    let isrc       = attributes      [ "isrc"       ]                                                 as?   String       ,
+                    let artistAttr = included.first(where: { $0[ "type" ] as? String == "artists" })?[ "attributes" ] as?  [String: Any] ,
+                    let albumAttr  = included.first(where: { $0[ "type" ] as? String == "albums"  })?[ "attributes" ] as?  [String: Any] ,
+                    let artist     = artistAttr      [ "name"       ]                                                 as?   String       ,
+                    let imageLinks = albumAttr       [ "imageLinks" ]                                                 as? [[String: Any]],
+                    let imageUrl   = imageLinks.last?[ "href"       ]                                                 as?   String  else {
+                return nil
+            }
+            // us url 사용시 적용됨
+            if var track = _storage[ id ] {
+                track.imageUrl = imageUrl
+                track.artist   = artist
+                track.isrc     = isrc
+                _storage[ id ] = track
+            }
+            else {
+                _storage[ id ] = Self(name: name, imageUrl: imageUrl, artist: artist, isrc: isrc, lyrics: nil)
+            }
+
+            return get(_storage[ id ])
         }
+
 
         if var track = _storage[ id ] {
             track.imageUrl = imageUrl
