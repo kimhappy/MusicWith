@@ -19,6 +19,17 @@ struct RecommendView: View {
         GridItem(.flexible())
     ]
 
+    @MainActor
+    private func loadTrackDataForIndex(_ index: Int) async {
+        try? await Task.sleep(nanoseconds: 1_000_000_000)
+
+        let name = await Track.name(_tracks[index].0)
+        let imageUrl = await Track.imageUrl(_tracks[index].0)
+        
+        _names[_tracks[index].0] = name
+        _imageUrls[_tracks[index].0] = imageUrl
+    }
+    
     public var body: some View {
         VStack {
             Text("현재 인기 있는 음악")
@@ -54,13 +65,7 @@ struct RecommendView: View {
                          }
                          .task {
                              if case nil = _names[ _tracks[ index ].0 ] {
-                                 let name     = await Track.name    (_tracks[ index ].0)
-                                 let imageUrl = await Track.imageUrl(_tracks[ index ].0)
-
-                                 DispatchQueue.main.async {
-                                     _names    [ _tracks[ index ].0 ] = name
-                                     _imageUrls[ _tracks[ index ].0 ] = imageUrl
-                                 }
+                                 await loadTrackDataForIndex(index)
                              }
                          }
                      }
@@ -73,3 +78,4 @@ struct RecommendView: View {
         }
     }
 }
+
