@@ -23,7 +23,7 @@ struct Track {
         let krUrl = "/tracks/\(id)?countryCode=KR&include=artists,albums"
         let usUrl = "/tracks/\(id)?countryCode=US&include=artists,albums"
         
-        guard let krjson       = await Query.getTidalJson(krUrl)  as?  [String: Any] ,
+        guard let krjson     = await Query.getTidalJson(krUrl)  as?  [String: Any] ,
               let data       = krjson          [ "data"       ]                                                 as?  [String: Any] ,
               let included   = krjson          [ "included"   ]                                                 as? [[String: Any]],
               let attributes = data            [ "attributes" ]                                                 as?  [String: Any] ,
@@ -35,7 +35,7 @@ struct Track {
               let imageLinks = albumAttr       [ "imageLinks" ]                                                 as? [[String: Any]],
               let imageUrl   = imageLinks.last?[ "href"       ]                                                 as?   String
         else {
-            guard   let usjson       = await Query.getTidalJson(usUrl)  as?  [String: Any] ,
+            guard   let usjson     = await Query.getTidalJson(usUrl)  as?  [String: Any] ,
                     let data       = usjson          [ "data"       ]                                                 as?  [String: Any] ,
                     let included   = usjson          [ "included"   ]                                                 as? [[String: Any]],
                     let attributes = data            [ "attributes" ]                                                 as?  [String: Any] ,
