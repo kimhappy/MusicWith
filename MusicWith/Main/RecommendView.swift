@@ -13,12 +13,12 @@ struct RecommendView: View {
     @State private var _tracks   : [(String, Int) ] = []
     @State private var _names    : [String: String] = [:]
     @State private var _imageUrls: [String: String] = [:]
-    
+
     private let _columns = [
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
-    
+
     @MainActor
     private func loadTracksWithDelay() async {
         for index in 0..<_tracks.count {
@@ -28,7 +28,7 @@ struct RecommendView: View {
             }
         }
     }
-    
+
     @MainActor
     private func loadTrackDataForIndex(_ index: Int) async {
         let trackId = _tracks[index].0
@@ -38,7 +38,7 @@ struct RecommendView: View {
         _names[trackId] = name
         _imageUrls[trackId] = imageUrl
     }
-    
+
     public var body: some View {
         VStack {
             Text("현재 인기 있는 음악")
